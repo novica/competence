@@ -1,5 +1,10 @@
 # Competence
 
+[![CI](https://github.com/novica/competence/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/novica/competence/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/competence.svg)](https://pypi.org/project/competence/)
+[![Python](https://img.shields.io/pypi/pyversions/competence.svg)](https://pypi.org/project/competence/)
+[![release-please](https://github.com/novica/competence/actions/workflows/release-please.yml/badge.svg?branch=main)](https://github.com/novica/competence/actions/workflows/release-please.yml)
+
 A local web app for running a team skills matrix, following Andy Sawyer's method in
 ["Implementing a Skills Matrix Across Data Teams"](https://medium.com/@andy-sawyer/implementing-a-skills-matrix-across-data-teams-58675755e20d):
 
