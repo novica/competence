@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ round.label }} · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/rounds">Rounds</a><span class="crumb">{{ round.label }}</span>{% endblock %}
+{% block content %}
+<h1>Round {{ round.label }}{% if round.held_on %} <span class="muted">{{ round.held_on }}</span>{% endif %}</h1>
+<p><a href="/round/{{ round.id }}/team">Team overview</a> · <a href="/round/{{ round.id }}/heatmap">Heatmap</a> · <a href="/compare?to={{ round.id }}">Compare with previous round</a></p>
+
+{% if people %}
+{% if teams %}<p class="help">Each person's team is recorded per round, like their role. Changing it here only changes
+  this round. Teams are managed in <a href="/admin/teams">Admin → Teams</a>.</p>{% endif %}
+<table class="status">
+  <thead><tr><th>Person</th><th>Role this round</th>{% if teams %}<th>Team this round</th>{% endif %}<th>Skills rated</th><th></th></tr></thead>
+  <tbody>
+  {% for s in people %}
+  <tr id="person-{{ s.person.id }}">
+    <td>{{ s.person.name }}</td>
+    {% if s.assessment_id %}
+    <td>{{ s.role_name }}</td>
+    {% if teams %}<td>
+      <form method="post" action="/round/{{ round.id }}/person/{{ s.person.id }}/team" class="inline">
+        <select name="team_id" aria-label="Team for {{ s.person.name }} this round" onchange="this.form.requestSubmit()">
+          <option value="">No team</option>
+          {% if s.team and s.team.retired_on %}<option value="{{ s.team.id }}" selected>{{ s.team.name }} (retired)</option>{% endif %}
+          {% for t in teams %}<option value="{{ t.id }}"{% if s.team and t.id == s.team.id %} selected{% endif %}>{{ t.name }}</option>{% endfor %}
+        </select>
+        <noscript><button class="secondary">Save</button></noscript>
+      </form></td>{% endif %}
+    <td>{{ s.rated }}</td>
+    <td><a href="/round/{{ round.id }}/person/{{ s.person.id }}">Rate</a> ·
+        <a href="/round/{{ round.id }}/person/{{ s.person.id }}/profile">Profile</a></td>
+    {% else %}
+    <td colspan="{{ 3 if teams else 2 }}">
+      <form method="post" action="/round/{{ round.id }}/person/{{ s.person.id }}/start" class="inline">
+        <label class="sr-only" for="role-{{ s.person.id }}">Role for {{ s.person.name }}</label>
+        <select name="role_id" id="role-{{ s.person.id }}" required>
+          <option value="">Choose role…</option>
+          {% for role in roles %}
+          <option value="{{ role.id }}"{% if role.id == s.last_role_id %} selected{% endif %}>{{ role.name }}</option>
+          {% endfor %}
+        </select>
+        {% if teams %}<label class="sr-only" for="team-{{ s.person.id }}">Team for {{ s.person.name }}</label>
+        <select name="team_id" id="team-{{ s.person.id }}">
+          <option value="">No team</option>
+          {% for t in teams %}<option value="{{ t.id }}"{% if t.id == s.last_team_id %} selected{% endif %}>{{ t.name }}</option>{% endfor %}
+        </select>{% endif %}
+        <button>Start assessment</button>
+        <span class="muted">{% if s.last_round_label %}pre-fills from {{ s.last_round_label }}{% else %}first assessment{% endif %}</span>
+      </form>
+    </td>
+    <td></td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No people yet. <a href="/admin/people">Add people</a> first.</p>
+{% endif %}
+{% endblock %}

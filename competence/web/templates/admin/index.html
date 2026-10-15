@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Admin · Competence{% endblock %}
+{% block crumbs %}<span class="crumb">Admin</span>{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+<p class="help">Changes here never break history: ratings point at permanent ids, so renaming is safe, and anything
+  that has ratings is retired rather than deleted. A backup is taken every time the app starts.</p>
+<ul class="admin-links">
+  <li><a href="/admin/skills">Skills</a> <span class="muted">{{ n_skills }} active in {{ n_categories }} categories{% if n_retired %}, {{ n_retired }} retired{% endif %} — add, rename, move, retire, split</span></li>
+  <li><a href="/admin/targets">Role targets</a> <span class="muted">the roles × skills grid</span></li>
+  <li><a href="/admin/levels">Level texts</a> <span class="muted">what each point means for skill level (0–8) and desire (1–3), shown to raters</span></li>
+  <li><a href="/admin/roles">Roles</a> <span class="muted">{{ n_roles }} active — add (copying targets), rename, retire</span></li>
+  <li><a href="/admin/certifications">Certifications</a> <span class="muted">{{ n_certs }} active — add, set how long they last and which roles need them, retire</span></li>
+  <li><a href="/admin/teams">Teams</a> <span class="muted">{{ n_teams }} active — add, rename, retire; a person's team is set per round</span></li>
+  <li><a href="/admin/people">People</a> <span class="muted">{{ n_people }} — rename, deactivate</span></li>
+  <li><a href="/admin/rounds">Rounds</a> <span class="muted">{{ n_rounds }} — rename, re-date, delete empty ones</span></li>
+</ul>
+<p><a href="/admin/catalogue.toml" download>Export the catalogue</a> <span class="muted">— roles, skills, targets,
+  certifications and level texts in use, as a file to start another database from (<code>competence init --catalogue FILE</code>).
+  No people or ratings.</span></p>
+{% endblock %}

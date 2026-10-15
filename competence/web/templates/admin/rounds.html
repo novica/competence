@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Rounds · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Rounds</span>{% endblock %}
+{% block content %}
+<h1>Rounds</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">The date decides the order of rounds (undated rounds count as newest), which decides what pre-fills and
+  what "previous round" means. Only an empty round can be deleted.</p>
+<table class="data admin">
+  <thead><tr><th>Round</th><th class="num">Assessments</th><th class="num">Goals</th><th></th></tr></thead>
+  <tbody>
+  {% for r in rounds %}
+  <tr>
+    <td><form method="post" action="/admin/rounds/{{ r.id }}" class="inline">
+      <input name="label" value="{{ r.label }}" required maxlength="40" aria-label="Label" size="10">
+      <input name="held_on" type="date" value="{{ r.held_on or '' }}" aria-label="Date">
+      <input name="notes" value="{{ r.notes }}" maxlength="2000" aria-label="Notes" placeholder="Notes" size="30">
+      <button class="secondary">Save</button></form></td>
+    <td class="num">{{ r.assessments }}</td><td class="num">{{ r.goals }}</td>
+    <td>{% if not r.assessments and not r.goals %}
+      <form method="post" action="/admin/rounds/{{ r.id }}/delete" onsubmit='return confirm({{ ("Delete round " ~ r.label ~ "?")|tojson }})'><button class="danger">Delete</button></form>
+      {% endif %}</td>
+  </tr>
+  {% else %}<tr><td colspan="4" class="muted">No rounds yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

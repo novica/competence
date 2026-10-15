@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit skill" if skill else "Add skill" }} · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><a class="crumb" href="/admin/skills">Skills</a><span class="crumb">{{ skill.name if skill else "Add" }}</span>{% endblock %}
+{% block content %}
+<h1>{{ "Edit skill" if skill else "Add a skill" }}</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+{% if skill %}<p class="help">Renaming or moving keeps all {{ skill.ratings }} ratings: they point at the skill's id.
+  Changing category moves the skill to the end of that category. Targets are edited in <a href="/admin/targets?cat={{ skill.category|urlencode }}">the targets grid</a>.</p>{% endif %}
+
+{% if not skill %}
+<form method="get" action="/admin/skills/new" class="inline">
+  <label>Category for suggested targets <select name="category">
+    {% for c in categories %}<option{% if c == v.category %} selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <button class="secondary">Suggest targets</button>
+</form>
+{% endif %}
+
+<form method="post" action="{{ '/admin/skills/%d' % skill.id if skill else '/admin/skills' }}" class="stacked">
+  <label>Category <input name="category" list="categories" required maxlength="120" value="{{ v.category }}">
+    <small>Pick an existing one or type a new name.</small></label>
+  <datalist id="categories">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist>
+  <label>Name <input name="name" required maxlength="120" value="{{ v.name }}"></label>
+  <label>Description <input name="description" maxlength="500" value="{{ v.description }}" size="70"></label>
+  <label>Tag (optional) <input name="tag" list="tags" maxlength="40" value="{{ v.tag }}">
+    <small>Groups skills across categories, e.g. by language or tool, so pages can be filtered by it. Blank = no tag.</small></label>
+  <datalist id="tags">{% for t in tags %}<option value="{{ t }}">{% endfor %}</datalist>
+  <label>Priority <select name="priority">
+    {% for p, label in [(3, "3 — crucial now"), (2, "2 — useful"), (1, "1 — niche")] %}<option value="{{ p }}"{% if p == v.priority %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+  <label>Experts needed (people at 5+) <input name="experts_needed" type="number" min="0" max="20" required value="{{ v.experts_needed }}"></label>
+
+  {% if not skill %}
+  <fieldset>
+    <legend>Target per role</legend>
+    <p class="muted">Pre-filled with the median target of the other skills in "{{ v.category }}". Blank = no target.</p>
+    <div class="target-inputs">
+    {% for r in roles %}
+      <label>{{ r.name }}
+        <input type="hidden" name="target_role" value="{{ r.id }}">
+        <select name="target_level"><option value="">–</option>
+          {% for l in levels %}<option value="{{ l }}"{% if v.targets.get(r.id) == l %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      </label>
+    {% endfor %}
+    </div>
+  </fieldset>
+  <label>Copy ratings from (optional, for splitting a skill)
+    <select name="copy_ratings_from"><option value="">Don't copy</option>
+      {% for s in all_skills %}<option value="{{ s.id }}"{% if s.id == v.copy_ratings_from %} selected{% endif %}>{{ s.category }} — {{ s.name }}</option>{% endfor %}</select>
+    <small>Copies that skill's ratings from the latest round that has any, as a starting point to review.</small></label>
+  {% endif %}
+
+  <p><button>{{ "Save" if skill else "Add skill" }}</button> <a href="/admin/skills">Cancel</a></p>
+</form>
+{% endblock %}

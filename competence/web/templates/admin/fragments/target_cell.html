@@ -1,0 +1,10 @@
+{% set url = "/admin/targets/%d/%d" % (role_id, skill_id) %}
+<td class="target-cell" id="t-{{ role_id }}-{{ skill_id }}">
+  <form method="post" action="{{ url }}" hx-post="{{ url }}" hx-trigger="change" hx-target="#t-{{ role_id }}-{{ skill_id }}" hx-swap="outerHTML">
+    <input type="hidden" name="back" value="{{ back }}">
+    <select name="level" aria-label="Target"><option value="">–</option>
+      {% for l in levels %}<option value="{{ l }}"{% if level == l %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    <noscript><button>Save</button></noscript>
+    {% if saved %}<span class="saved" role="status">saved</span>{% endif %}
+  </form>
+</td>

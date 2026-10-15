@@ -1,0 +1,24 @@
+# Personal data about employees: never commit
+data/
+skills_matrix*.xlsx
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+# roborev snapshots
+/.roborev/
+
+# Local notes and tooling, not part of the app
+CLAUDE.md
+DESIGN.md
+research.md
+.beads/
+.bv/
+.claude/
+.codegraph/
+*.swp
+legacy/
+
+# Build output
+dist/

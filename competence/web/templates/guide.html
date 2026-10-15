@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Guide · Competence{% endblock %}
+{% block crumbs %}<span class="crumb">Guide</span>{% endblock %}
+{% block content %}
+<article class="guide">
+<h1>Guide</h1>
+<p class="lede">How Competence works, how to run a round, and what every number means.</p>
+<nav aria-label="Contents"><ol>
+  <li><a href="#method">The method</a></li>
+  <li><a href="#round">Running a round</a></li>
+  <li><a href="#numbers">What the numbers mean</a> (<a href="#flags">flags</a>)</li>
+  <li><a href="#certifications">Certifications</a></li>
+  <li><a href="#catalogue">Changing skills, roles and targets</a></li>
+  <li><a href="#data">Your data</a></li>
+</ol></nav>
+
+<h2 id="method">1. The method</h2>
+<p>Based on Andy Sawyer, <a href="https://medium.com/@andy-sawyer/implementing-a-skills-matrix-across-data-teams-58675755e20d"
+  rel="noreferrer">"Implementing a Skills Matrix Across Data Teams"</a>. Each person rates every skill twice:</p>
+<dl>
+  <dt>Skill level</dt><dd>How good they are at it now.</dd>
+  <dt>Desire</dt><dd>How much they want to develop it. A skill someone is good at but doesn't want to do is a
+    different situation from one they're keen on.</dd>
+</dl>
+<p>Skill level uses the Fibonacci scale 0, 1, 2, 3, 5, 8: the growing steps reflect that skill grows non-linearly,
+  make the top levels deliberately hard to reach, and make people choose instead of rating everything "in the middle".
+  Desire has three points, as in the article: interest doesn't grow like skill, and three clear statements are
+  quicker to answer and more consistent. The article numbers them 0, 1, 2; here they are 1, 2, 3, so that no interest
+  doesn't wipe out a skill in competency (below). Blank means "not assessed", which is not the same as the lowest
+  point. What each score means for this team:</p>
+<table class="data compact">
+  <thead><tr><th scope="col">Score</th><th scope="col">Skill level</th><th scope="col">Desire</th></tr></thead>
+  <tbody>{% for l in levels %}<tr><td class="num">{{ l }}</td><td>{{ labels.level[l] }}</td><td>{{ labels.desire.get(l, "") }}</td></tr>{% endfor %}</tbody>
+</table>
+<p class="muted">These texts can be changed in <a href="/admin/levels">Admin → Level texts</a>.</p>
+<dl>
+  <dt>Self and agreed</dt><dd>The person first rates themselves (<em>self</em>). If talking it through with the group
+    changes a rating, that goes in <em>agreed</em>. Most skills only have a self-rating.</dd>
+  <dt>Level used</dt><dd>The agreed rating if there is one, otherwise the self-rating. Every figure uses this.
+    Example: self 5, agreed blank → 5. Self 5, agreed 3 → 3.</dd>
+  <dt>Competency</dt><dd>Level used × desire, from 0 to 24. Desire weights the skill: 1 (not interested) keeps the
+    level, 2 doubles it, 3 (passionate) triples it. High when someone is both good at and keen on a skill.</dd>
+  <dt>Role target</dt><dd>The level each role should reach in each skill. Blank means no target for that role.
+    Gap = level used − target: negative is below target.</dd>
+</dl>
+
+<h2 id="round">2. Running a round</h2>
+<ol>
+  <li><strong>Before:</strong> check that skills, roles and targets fit the team (<a href="#catalogue">section 5</a>)
+    and that everyone is listed in <a href="/admin/people">Admin → People</a>.</li>
+  <li><strong>Start the round</strong> on the <a href="/rounds">Rounds</a> page with a label (e.g. "2026-Q4") and a date. The date decides
+    the order of rounds, and with it what pre-fills and what "previous round" means; a round without a date counts
+    as the newest.</li>
+  <li><strong>Start each assessment</strong> on the round page and pick the person's role (and team, if you use teams)
+    for this round. It is pre-filled
+    from their previous assessment: self = last round's level used, agreed = blank, desire carried over. Retired skills
+    are left out.</li>
+  <li><strong>Rate:</strong> each dropdown saves as soon as it changes. Highlighted dropdowns differ from last round,
+    and <em>Last</em> shows last round's level · desire. Go through the self-ratings, then set <em>agreed</em> only
+    where the discussion changes one. "What the levels mean" explains each score, and hovering an option shows its
+    text too. With two or more tags in use, the form can be filtered by tag.</li>
+  <li><strong>Afterwards:</strong>
+    <ul>
+      <li><strong>Team overview:</strong> headline figures with the change since the previous round, then per-skill
+        figures and flags. Click a column heading to sort.</li>
+      <li><strong>Heatmap:</strong> skills × people, showing level, desire, competency or gap.</li>
+      <li><strong>Person profile:</strong> biggest gaps, top interests, changes since the previous round, and the
+        development goals.</li>
+      <li><strong>Compare:</strong> any two rounds, for the team or one person, with a trend across all rounds.</li>
+      <li><strong><a href="/people">People</a>:</strong> each person's newest round, role, team, open goals and
+        certifications needing attention.</li>
+    </ul></li>
+</ol>
+
+<h2 id="numbers">3. What the numbers mean</h2>
+<p>All figures use level used and today's role targets, including for past rounds: changing a target changes old gaps
+  too. The team overview compares with the previous round using today's skills, so a skill added since then counts as
+  not assessed then.</p>
+<p id="medians">Levels, desire and competency are summed up with the <strong>median</strong>, not the average: the
+  middle value when everyone's ratings are put in order, and with an even number the lower of the two middle ones (of
+  3 and 5: 3). The scale is uneven (0, 1, 2, 3, 5, 8), so an average like 4.3 is a level nobody holds; the median is
+  always a point on the scale. The other side: a median moves in steps (3 to 5) and can stay put while a few people
+  improve, so small changes may not show. A category's median is the median of its skills' medians.</p>
+<p id="compare">On the compare page, "Only changed skills" keeps a skill when someone assessed in both rounds has a
+  different level used or desire for it (going from unrated to rated counts). People who joined or left in between
+  don't count, and two people moving in opposite directions still do, even if the team median stays the same.
+  "Retired in between" lists skills retired between the two rounds and leaves them out of the figures; it needs
+  both rounds to have a date.</p>
+<h3 id="teams">Teams</h3>
+<p>Several teams can share the same skills, roles and targets. A person's team is recorded per round, like their role,
+  so someone who moves keeps their old rounds under the old team. With a team chosen, every figure covers that team
+  only, and a comparison with an earlier round uses who was in the team then. Experts needed applies to each team on
+  its own. Certifications follow a person's team in their latest assessment.</p>
+<p>Each team can choose the skill categories it uses (Admin → Teams). Its rating forms and team views then only show
+  those skills, so a small team's figures aren't full of skills it never uses; "show every category" on the rating
+  page still allows rating one outside them. The "Everyone" views always count every skill and every person, so the teams' figures don't add up to
+  Everyone's: ratings outside a team's categories, and people without a team that round, only count there.</p>
+<h3>Per skill (team overview)</h3>
+<dl>
+  <dt>Assessed</dt><dd>People with a level for the skill.</dd>
+  <dt>3+ and 5+</dt><dd>People at level 3 or more (can work independently) and 5 or more (advanced).
+    5+ is shown against the skill's <em>experts needed</em>.</dd>
+  <dt>Below target, shortfall</dt><dd>People below their role's target, and the points they are below it, added up.</dd>
+  <dt>Priority-weighted shortfall</dt><dd>Priority (1–3) × shortfall. Use it to rank what matters most.</dd>
+  <dt>Development candidates</dt><dd>People with desire 3 (passionate) and level 2 or below: they want it and aren't
+    there yet.</dd>
+</dl>
+<h3 id="flags">Flags</h3>
+<p>Checked in this order; a skill gets the first that applies, and only once someone has been assessed in it:</p>
+<dl>
+  {% for name, rule in flags %}<dt>{{ name }}</dt><dd>{{ rule }}</dd>{% endfor %}
+</dl>
+<p class="muted">With the default settings (2 experts needed for priority 3), "{{ flags[1][0] }}" fires before
+  "{{ flags[2][0] }}" can. Set experts needed to 1 for a skill to see key-person risks.</p>
+<h3>Headline figures</h3>
+<dl>
+  <dt>At or above role target</dt><dd>Share of rated person × skill pairs that have a target and meet it.</dd>
+  <dt>Priority-weighted shortfall per person</dt><dd>The skills' weighted shortfalls added up and divided by the
+    people assessed. A total would grow with the size of the team; per person, teams and rounds can be compared.</dd>
+  <dt>Team gaps, below expert target, key-person risks</dt><dd>How many skills carry each flag.</dd>
+  <dt>Open development goals</dt><dd>Goals that are open or in progress now; this count has no history per round.</dd>
+</dl>
+<h3>Person profile and heatmap</h3>
+<dl>
+  <dt>Top priority gaps</dt><dd>Skills furthest below target, weighted by priority (priority × points below).</dd>
+  <dt>Top interests</dt><dd>Desire 2 or 3, highest desire first, then lowest current level.</dd>
+  <dt>Goals</dt><dd>Progress compares the level used in the round you're looking at with the goal's target level.</dd>
+  <dt>Heatmap</dt><dd>Skills × people, coloured by level, desire, competency or gap. Click a cell to open that rating.</dd>
+</dl>
+
+<h2 id="certifications">4. Certifications</h2>
+<p>Qualifications that are held or not, usually with an expiry date: safety training, licences, cloud or security
+  certifications. They aren't part of rounds; their status is worked out from the dates, as of today:</p>
+<dl>
+  {% for key, label in cert_statuses %}<dt>{{ label }}</dt><dd>{{ cert_rules[key] }}</dd>{% endfor %}
+</dl>
+<p>Which certifications are required depends on the role in a person's latest assessment; someone not assessed yet has
+  none required. Renewing adds a new record and keeps the old one as history; the newest record counts. A record
+  entered by mistake can be deleted. Changing how long a certification stays valid only affects records added
+  afterwards. "Nobody holds it" marks a certification no active person has a valid one of.</p>
+
+<h2 id="catalogue">5. Changing skills, roles and targets</h2>
+<p>The starting targets, priorities and experts needed in the shipped catalogues are the author's judgement, not a
+  standard. Review them in Admin → Role targets and Admin → Skills before the first real round.</p>
+<dl>
+  <dt>Nothing breaks history</dt><dd>Ratings point at a skill's permanent id, so renaming or moving a skill is safe.
+    Anything with ratings, goals or records is <em>retired</em> (hidden from new rounds, kept in old ones), never
+    deleted. Only unused skills and empty rounds can be deleted.</dd>
+  <dt>Renaming a category</dt><dd>Admin → Skills, "Rename category" under its heading. All its skills, retired ones
+    too, and the teams that use it follow. To merge two categories, move the skills one by one instead.</dd>
+  <dt>Splitting a skill</dt><dd>Add the new skills with "copy ratings from" the old one, which copies its ratings from
+    the latest round that has any, then retire the old skill.</dd>
+  <dt>Targets</dt><dd>Admin → Role targets. With one category shown, the first row sets a role's target for all its
+    skills at once; set the usual level first, then the exceptions. A new skill's suggested targets are the median of
+    its category.</dd>
+  <dt>Priority and experts needed</dt><dd>Per skill. Priority 3 = crucial now, 2 = useful, 1 = niche.</dd>
+  <dt>Tags</dt><dd>Optional short labels that cut across categories (e.g. R / Python). A blank tag shows no badge.
+    With two or more in use, pages can be filtered by tag.</dd>
+  <dt>Another team</dt><dd>A new database can start from a catalogue file instead of the data-team one:
+    <code>competence init --catalogue empty</code> (one role, no skills), <code>--catalogue dev</code>
+    (a software team), or your own file (<code>empty.toml</code> in the package explains the layout). Admin →
+    "Export the catalogue" saves this database's catalogue as such a file, without people or ratings. After that, everything is changed here in Admin.</dd>
+</dl>
+
+<h2 id="data">6. Your data</h2>
+<dl>
+  <dt>Personal data</dt><dd>Ratings are personal data about employees. The app runs on this computer only and
+    can't be reached from other machines. Keep the computer's disk encrypted.</dd>
+  <dt>Where</dt><dd>This database is <code>{{ db_path }}</code>.</dd>
+  <dt>Backups</dt><dd>The database is copied to <code>{{ backups }}</code> every time the app starts, and before each
+    "Set all" in the targets grid. The newest 20 per database are kept. Only the app's own backups are trimmed:
+    a copy you rename (e.g. <code>matrix-before-cleanup.sqlite</code>) is never deleted.</dd>
+  <dt>Going back</dt><dd>There is no undo. To go back to a backup, stop the app and copy the backup over
+    the database file above; anything entered after that backup is lost.</dd>
+  <dt>Off-machine copies</dt><dd>The backups are on the same disk as the database, so they don't protect against
+    losing the computer. Ask IT how to keep an encrypted copy elsewhere.</dd>
+</dl>
+</article>
+{% endblock %}

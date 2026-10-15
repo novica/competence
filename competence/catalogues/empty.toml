@@ -1,0 +1,46 @@
+# A blank catalogue, to start a team from scratch:
+#
+#     competence init --catalogue empty
+#
+# It has one role (assessments need one) and no skills. Add categories, skills, roles and targets in
+# Admin afterwards, or copy this file, fill it in and start from your copy (competence init --catalogue
+# my-team.toml). Admin → "Export the catalogue" writes the catalogue in use in this same layout. The layout:
+#
+#     roles = [
+#       { code = "MEMBER", name = "Team member" },
+#       { code = "LEAD", name = "Team lead" },
+#     ]
+#
+#     [[categories]]
+#     name = "Ways of working"
+#     targets = { MEMBER = 3, LEAD = 5 }        # default target per role (0, 1, 2, 3, 5 or 8)
+#     skills = [
+#       { name = "Documentation", description = "Writes down how things are done so others can follow" },
+#       { name = "Mentoring", tag = "People", targets = { MEMBER = 1 } },   # own target for MEMBER
+#     ]
+#
+# Leave a role out of `targets` for "no target" (blank). `tag` is optional: a short label that groups
+# skills across categories so pages can be filtered by it. A skill can also set `priority` (1-3) and
+# `experts_needed` (0-20); otherwise they follow from its targets.
+#
+# Optionally, say what the scale means for your team (any of 0, 1, 2, 3, 5, 8; the rest keep the defaults,
+# which are listed in Admin → Level texts):
+#
+#     [levels]
+#     level = { 3 = "Does it alone, routine cases", 8 = "Teaches others, sets the standard" }
+#     desire = { 1 = "Rather not" }
+#
+# (Put `[levels]` after `roles` and before the first `[[categories]]`, or at the very end.)
+#
+# Certifications (optional), each with how long it stays valid (leave out for "never expires") and the
+# roles that require it:
+#
+#     [[certifications]]
+#     name = "First aid"
+#     description = "Course every two years"
+#     valid_months = 24
+#     roles = ["MEMBER", "LEAD"]
+
+roles = [
+  { code = "MEMBER", name = "Team member" },
+]

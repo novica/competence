@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Roles · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Roles</span>{% endblock %}
+{% block content %}
+<h1>Roles</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">A person's role is chosen when their assessment starts, so past rounds keep the role they had then.
+  Retired roles can't be picked for new assessments.</p>
+
+<table class="data admin">
+  <thead><tr><th>Name</th><th class="num">Assessments</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for r in roles %}
+  <tr{% if r.retired_on %} class="retired"{% endif %}>
+    <td><form method="post" action="/admin/roles/{{ r.id }}" class="inline">
+      <input name="name" value="{{ r.name }}" required maxlength="120" aria-label="Name"><button class="secondary">Rename</button></form></td>
+    <td class="num">{{ r.assessments }}</td>
+    <td>{% if r.retired_on %}retired {{ r.retired_on }}{% else %}active{% endif %}</td>
+    <td>{% if r.retired_on %}
+      <form method="post" action="/admin/roles/{{ r.id }}/unretire"><button class="secondary">Un-retire</button></form>
+      {% else %}
+      <form method="post" action="/admin/roles/{{ r.id }}/retire"><button class="secondary">Retire</button></form>
+      {% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Add a role</h2>
+<form method="post" action="/admin/roles" class="inline">
+  <label>Name <input name="name" required maxlength="120"></label>
+  <label>Copy targets from <select name="copy_targets_from"><option value="">No targets yet</option>
+    {% for r in roles %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}</select></label>
+  <button>Add role</button>
+</form>
+<p class="muted">Then adjust the new role's targets in <a href="/admin/targets">the targets grid</a>.</p>
+{% endblock %}

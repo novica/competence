@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Role targets · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Role targets</span>{% endblock %}
+{% block content %}
+<h1>Role targets <a class="help-link" href="/guide#catalogue" title="Changing skills, roles and targets" aria-label="Changing skills, roles and targets">?</a></h1>
+<p class="help">The level each role should reach in each skill (0, 1, 2, 3, 5, 8; blank = no target). Each change saves
+  straight away, and gaps recalculate everywhere, including past rounds. With one category shown, the first row
+  sets a role's target for all its skills at once (the ones shown, if a tag is picked): set the usual level first,
+  then change the exceptions. A backup is taken before each "Set all", since it replaces the exceptions.</p>
+
+<form method="get" class="inline" aria-label="Filter">
+  <label>Category <select name="cat">
+    {% for c in categories %}<option{% if c == cat %} selected{% endif %}>{{ c }}</option>{% endfor %}
+    <option value="all"{% if cat == "all" %} selected{% endif %}>All categories</option></select></label>
+  {% if tags|length > 1 %}<label>Tag <select name="tag"><option value="">All</option>
+    {% for t in tags %}<option{% if t == tag %} selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>{% endif %}
+  <button>Show</button> <span class="muted">{{ skills|length }} skills × {{ roles|length }} roles</span>
+</form>
+
+<div class="table-wrap heat-wrap">
+<table class="data targets">
+  <thead><tr><th class="skill-col">Skill</th>{% for r in roles %}<th>{{ r.name }}</th>{% endfor %}</tr>
+  {% if cat != "all" and skills %}
+  <tr class="bulk">
+    <th scope="row" class="skill-col">All {{ skills|length }} skills shown</th>
+    {% for r in roles %}
+    <td><form method="post" action="/admin/targets/{{ r.id }}"
+          onsubmit='return confirm({{ ("Set " ~ r.name ~ "’s target for all " ~ skills|length ~ " skills shown in " ~ cat ~ "? Their current values for this role are replaced (a backup is taken first).")|tojson }})'>
+      <input type="hidden" name="category" value="{{ cat }}"><input type="hidden" name="tag" value="{{ tag or '' }}">
+      <input type="hidden" name="back" value="{{ back }}">
+      <select name="level" aria-label="Target for all shown skills: {{ r.name }}"><option value="">–</option>
+        {% for l in levels %}<option value="{{ l }}">{{ l }}</option>{% endfor %}</select>
+      <button class="secondary">Set all</button></form></td>
+    {% endfor %}
+  </tr>
+  {% endif %}
+  </thead>
+  <tbody>
+  {% for s in skills %}
+  <tr id="skill-{{ s.id }}">
+    <th scope="row" class="skill-col">{{ s.name }}{% if cat == "all" %}<small>{{ s.category }}</small>{% endif %}</th>
+    {% for r in roles %}{% set role_id, skill_id, level = r.id, s.id, targets.get((r.id, s.id)) %}
+      {% include "admin/fragments/target_cell.html" %}
+    {% endfor %}
+  </tr>
+  {% else %}<tr><td class="muted">No skills.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

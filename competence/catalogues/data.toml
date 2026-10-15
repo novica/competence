@@ -1,0 +1,260 @@
+# Skill catalogue for data teams (R, Python, git/GitHub and the general data skills around them).
+# Loaded once by `competence init`; after that the database is the source of truth: edit in Admin.
+#
+# Targets use the scale 0, 1, 2, 3, 5, 8 and are the author's judgement, not an external standard.
+# A skill's target for a role is its category's default unless the skill lists its own.
+# Leave a role out of a category's targets for "no target" (blank), which is not the same as 0.
+# Priority and experts needed are derived from the targets (see core/catalogue.py); change them in Admin.
+
+# Codes are only used inside this file, as keys in `targets`.
+roles = [
+  { code = "DA", name = "Data Analyst" },
+  { code = "DS", name = "Data Scientist" },
+  { code = "DE", name = "Data Engineer" },
+  { code = "AE", name = "Analytics Engineer" },
+  { code = "ST", name = "Statistician" },
+  { code = "RSE", name = "Research Software Engineer" },
+  { code = "MLE", name = "ML Engineer" },
+  { code = "DM", name = "Data Manager / Steward" },
+  { code = "LEAD", name = "Data Team Lead" },
+]
+
+[[categories]]
+name = "R Programming"
+targets = { DA = 3, DS = 5, DE = 2, AE = 3, ST = 5, RSE = 5, MLE = 3, DM = 2, LEAD = 3 }
+skills = [
+  { name = "Base R fundamentals", tag = "R", description = "Vectors, lists, data frames, indexing, writing functions, control flow" },
+  { name = "tidyverse (dplyr, tidyr)", tag = "R", description = "Wrangling with dplyr verbs, pivoting and reshaping with tidyr", targets = { DA = 5, DM = 3 } },
+  { name = "data.table / arrow / duckdb", tag = "R", description = "Fast in-memory and larger-than-memory data in R", targets = { DA = 2, DS = 3, DE = 3, ST = 3, RSE = 3, DM = 1, LEAD = 2 } },
+  { name = "ggplot2", tag = "R", description = "Grammar-of-graphics plotting, themes, facets, publication figures", targets = { DA = 5, DE = 1, AE = 2, RSE = 3, MLE = 2, DM = 1 } },
+  { name = "Quarto / R Markdown", tag = "R", description = "Reproducible reports, parameterised documents, websites, slides", targets = { DA = 5, MLE = 2, DM = 3 } },
+  { name = "Shiny", tag = "R", description = "Interactive web apps: reactivity, modules, bslib layouts", targets = { DS = 3, DE = 1, AE = 2, ST = 2, MLE = 2, DM = 1, LEAD = 2 } },
+  { name = "Functional programming (purrr)", tag = "R", description = "map/reduce patterns, iteration without loops, error-safe wrappers", targets = { DA = 2, DS = 3, AE = 2, ST = 3, DM = 1, LEAD = 2 } },
+  { name = "R package development", tag = "R", description = "usethis, devtools, roxygen2 docs, DESCRIPTION/NAMESPACE, R CMD check", targets = { DA = 1, DS = 3, AE = 2, ST = 3, RSE = 8, DM = 1, LEAD = 2 } },
+  { name = "Testing R code (testthat)", tag = "R", description = "Unit tests, snapshots, fixtures, coverage (covr)", targets = { DA = 1, DS = 3, DE = 3, ST = 3, RSE = 8, DM = 1, LEAD = 2 } },
+  { name = "Reproducible environments (renv)", tag = "R", description = "Lockfiles, project libraries, restoring environments", targets = { DA = 2, DS = 3, DE = 3, ST = 3 } },
+  { name = "Pipelines (targets)", tag = "R", description = "Declarative, cached analysis pipelines", targets = { DA = 1, DS = 3, DE = 3, ST = 3, DM = 1, LEAD = 2 } },
+  { name = "Debugging R code", tag = "R", description = "browser(), traceback(), debug(), IDE breakpoints, reprex", targets = { DA = 2, DS = 3, DE = 3, ST = 3, DM = 1, LEAD = 2 } },
+  { name = "Strings, dates & factors", tag = "R", description = "stringr/regex, lubridate, forcats", targets = { DS = 3, DE = 3, ST = 3, RSE = 3, MLE = 2, DM = 3, LEAD = 2 } },
+  { name = "Reporting tables (gt / flextable)", tag = "R", description = "Publication-quality tables for reports and papers", targets = { DA = 5, DS = 3, DE = 0, AE = 1, ST = 3, RSE = 2, MLE = 0, LEAD = 2 } },
+  { name = "Office I/O (readxl / openxlsx2 / officer)", tag = "R", description = "Reading and writing Excel, Word and PowerPoint from R", targets = { DS = 2, DE = 1, AE = 1, ST = 2, RSE = 2, MLE = 0, DM = 3, LEAD = 2 } },
+  { name = "Interactive visualisation (plotly / leaflet)", tag = "R", description = "htmlwidgets, interactive charts and maps", targets = { DS = 3, DE = 0, AE = 1, ST = 2, RSE = 3, MLE = 1, DM = 0, LEAD = 1 } },
+  { name = "Shiny frameworks & testing (golem / rhino / shinytest2)", tag = "R", description = "Structuring production Shiny apps as packages; app tests", targets = { DA = 1, DS = 2, DE = 0, AE = 1, ST = 1, MLE = 1, DM = 0, LEAD = 1 } },
+  { name = "Spatial data (sf / terra)", tag = "R", description = "Vector and raster data, projections, spatial joins", targets = { DA = 2, DS = 3, DE = 1, AE = 1, ST = 3, RSE = 2, MLE = 1, DM = 1, LEAD = 1 } },
+  { name = "Object-oriented R (S3 / S4 / R6 / S7)", tag = "R", description = "Classes, generics and methods; choosing an OO system", targets = { DA = 1, DS = 2, DE = 1, AE = 1, ST = 2, MLE = 2, DM = 0, LEAD = 1 } },
+  { name = "Tidy evaluation & metaprogramming (rlang)", tag = "R", description = "{{ }}, .data, quosures; writing functions around dplyr/ggplot2", targets = { DA = 1, DS = 2, DE = 1, AE = 1, ST = 2, MLE = 2, DM = 0, LEAD = 1 } },
+  { name = "Errors & user messaging (cli / conditions)", tag = "R", description = "cli_abort/cli_warn, custom conditions, tryCatch/withCallingHandlers", targets = { DA = 1, DS = 2, AE = 1, ST = 1, MLE = 2, DM = 0, LEAD = 1 } },
+  { name = "Command-line R (Rscript / Rapp)", tag = "R", description = "Running R non-interactively, CLI arguments, scheduled scripts", targets = { DA = 1, DS = 2, DE = 3, AE = 2, ST = 1, DM = 0, LEAD = 1 } },
+  { name = "R-Python interop (reticulate)", tag = "R", description = "Calling Python from R, sharing objects, managing Python envs", targets = { DA = 0, DS = 3, AE = 1, ST = 1, RSE = 3, DM = 0, LEAD = 1 } },
+  { name = "Profiling & benchmarking (profvis / bench)", tag = "R", description = "Finding bottlenecks, vectorising, memory use", targets = { DA = 0, DS = 2, DE = 3, AE = 2, ST = 2, DM = 0, LEAD = 1 } },
+  { name = "Parallel & async R (future / mirai / promises)", tag = "R", description = "Parallel maps, async Shiny, distributing work to workers", targets = { DA = 0, DS = 2, DE = 3, AE = 1, ST = 2, DM = 0, LEAD = 1 } },
+  { name = "Rcpp / C++ integration", tag = "R", description = "Rcpp, cpp11; compiled code in packages", targets = { DA = 0, DS = 1, DE = 1, AE = 0, ST = 1, MLE = 2, DM = 0, LEAD = 1 } },
+  { name = "CRAN / r-universe publishing", tag = "R", description = "Submission policies, reverse-dependency checks, win/mac builders", targets = { DA = 0, DS = 1, DE = 0, AE = 0, ST = 1, MLE = 1, DM = 0, LEAD = 1 } },
+]
+
+[[categories]]
+name = "Python Programming"
+targets = { DA = 1, DS = 5, DE = 5, AE = 3, ST = 2, RSE = 3, MLE = 5, DM = 1, LEAD = 2 }
+skills = [
+  { name = "Core Python", tag = "Python", description = "Types, functions, comprehensions, modules, error handling", targets = { MLE = 8 } },
+  { name = "pandas / polars", tag = "Python", description = "DataFrame wrangling, groupby, joins, reshaping", targets = { DA = 2 } },
+  { name = "NumPy", tag = "Python", description = "Arrays, vectorisation, broadcasting" },
+  { name = "Plotting (matplotlib / seaborn / plotnine / plotly)", tag = "Python", description = "Static and interactive charts", targets = { DA = 2, DE = 1 } },
+  { name = "Notebooks (Jupyter / Quarto)", tag = "Python", description = "Notebook workflows, keeping notebooks reproducible, converting them to reports" },
+  { name = "Environments & packaging (uv / venv / conda / pyproject.toml)", tag = "Python", description = "Isolated environments, lockfiles, building packages", targets = { RSE = 5 } },
+  { name = "Testing (pytest)", tag = "Python", description = "Fixtures, parametrise, mocking, coverage", targets = { RSE = 5 } },
+  { name = "Type hints & static checking (mypy / pyright)", tag = "Python", description = "Annotations, catching errors before running", targets = { DA = 0, ST = 1 } },
+  { name = "Linting & formatting (ruff)", tag = "Python", description = "Consistent style, pre-commit hooks" },
+  { name = "Machine learning (scikit-learn)", tag = "Python", description = "Pipelines, cross-validation, model evaluation", targets = { DE = 1, MLE = 8 } },
+  { name = "Statistical modelling (statsmodels)", tag = "Python", description = "Regression, GLMs, time series in Python", targets = { DE = 1, ST = 3 } },
+  { name = "Apps (Streamlit / Shiny for Python / Dash)", tag = "Python", description = "Interactive data apps", targets = { DA = 2 } },
+  { name = "Web APIs (FastAPI / httpx)", tag = "Python", description = "Calling and building APIs" },
+  { name = "Data validation (pydantic / pandera)", tag = "Python", description = "Schemas and checks on data" },
+  { name = "Performance & parallel (numba / multiprocessing / dask)", tag = "Python", description = "Profiling, compiled code, out-of-core and parallel work" },
+  { name = "Command-line tools (typer / click)", tag = "Python", description = "Scripts with arguments, packaged CLIs", targets = { RSE = 5 } },
+]
+
+[[categories]]
+name = "Other Languages & Tools"
+targets = { DA = 2, DS = 3, DE = 5, AE = 3, ST = 2, RSE = 3, MLE = 5, DM = 1, LEAD = 2 }
+skills = [
+  { name = "SQL", tag = "General", description = "Joins, window functions, CTEs, query tuning", targets = { DA = 5, DE = 8, AE = 8, MLE = 3, DM = 3, LEAD = 3 } },
+  { name = "Command line / shell", tag = "General", description = "Bash/PowerShell, file ops, scripting, SSH", targets = { DA = 1, DS = 2, RSE = 5 } },
+  { name = "IDE proficiency (RStudio / Positron / VS Code)", tag = "General", description = "Projects, debugger, git pane, extensions, shortcuts", targets = { DA = 3, DE = 3, ST = 3, RSE = 5, MLE = 3, DM = 2, LEAD = 3 } },
+]
+
+[[categories]]
+name = "Git (Version Control)"
+targets = { DA = 2, DS = 3, DE = 5, AE = 5, ST = 3, RSE = 5, MLE = 5, DM = 2, LEAD = 3 }
+skills = [
+  { name = "Git basics", tag = "General", description = "init/clone, add, commit, diff, log, status; good commit messages", targets = { DA = 3, DS = 5, RSE = 8 } },
+  { name = "Branching & merging", tag = "General", description = "Feature branches, merge strategies, keeping branches up to date" },
+  { name = "Resolving merge conflicts", tag = "General", description = "Reading conflict markers, resolving safely, testing after merge" },
+  { name = "Rebase & history editing", tag = "General", description = "Interactive rebase, squash, amend, reset vs revert, reflog recovery", targets = { DA = 1, DS = 2, DE = 3, AE = 3, ST = 1, MLE = 3, DM = 1, LEAD = 2 } },
+  { name = "Repo hygiene", tag = "General", description = ".gitignore, no data/secrets in repos, large files (LFS), project structure", targets = { DM = 3 } },
+  { name = "Git from R (usethis / gert)", tag = "R", description = "use_git(), use_github(), git pane in RStudio/Positron", targets = { DE = 2, AE = 2, MLE = 2, DM = 1, LEAD = 2 } },
+  { name = "Stash, cherry-pick & worktrees", tag = "General", description = "Parking work, moving single commits, parallel checkouts", targets = { DA = 1, DS = 2, DE = 3, AE = 3, ST = 1, MLE = 3, DM = 0, LEAD = 2 } },
+  { name = "Bisect & blame", tag = "General", description = "Finding the commit that introduced a bug; tracing line history", targets = { DA = 0, DS = 2, DE = 3, AE = 3, ST = 1, MLE = 3, DM = 0, LEAD = 1 } },
+  { name = "Git hooks & pre-commit", tag = "General", description = "Automated checks before commit/push (pre-commit framework, precommit R package)", targets = { DA = 0, DS = 1, DE = 3, AE = 3, ST = 0, RSE = 3, MLE = 3, DM = 0, LEAD = 1 } },
+]
+
+[[categories]]
+name = "GitHub (Collaboration)"
+targets = { DA = 2, DS = 3, DE = 5, AE = 5, ST = 2, RSE = 5, MLE = 5, DM = 2, LEAD = 3 }
+skills = [
+  { name = "Issues & project boards", tag = "General", description = "Writing good issues, labels, milestones, GitHub Projects", targets = { DE = 3, AE = 3, MLE = 3, DM = 3, LEAD = 5 } },
+  { name = "Pull requests & code review", tag = "General", description = "Opening PRs, reviewing others' code, suggesting changes", targets = { LEAD = 5 } },
+  { name = "GitHub Actions (CI/CD)", tag = "General", description = "R CMD check / pytest / lint workflows, r-lib/actions, scheduled jobs", targets = { DA = 1, DS = 2, ST = 1, DM = 1, LEAD = 2 } },
+  { name = "GitHub Pages / pkgdown / Quarto publish", tag = "General", description = "Publishing docs, package sites and reports", targets = { DA = 1, DS = 2, DE = 2, AE = 2, MLE = 2, DM = 1, LEAD = 2 } },
+  { name = "Repo administration", tag = "General", description = "Permissions, teams, branch protection, templates, CODEOWNERS", targets = { DA = 1, DS = 1, DE = 3, AE = 3, ST = 1, RSE = 3, MLE = 3, LEAD = 5 } },
+  { name = "Releases & versioning", tag = "General", description = "Tags, semantic versioning, NEWS.md, changelogs", targets = { DA = 1, DS = 2, DE = 3, AE = 3, ST = 1, MLE = 3, DM = 1, LEAD = 2 } },
+  { name = "Open-source contribution", tag = "General", description = "Forks, upstream PRs, licences, contributing guidelines", targets = { DA = 1, DS = 2, DE = 2, AE = 2, ST = 1, MLE = 2, DM = 1, LEAD = 2 } },
+  { name = "GitHub CLI (gh)", tag = "General", description = "PRs, issues, runs and releases from the terminal", targets = { DA = 1, DS = 2, DE = 3, AE = 3, ST = 1, MLE = 3, DM = 1, LEAD = 2 } },
+  { name = "Dependabot & security alerts", tag = "General", description = "Dependency updates, secret scanning, code scanning", targets = { DA = 0, DS = 1, DE = 3, AE = 3, ST = 0, RSE = 3, MLE = 3 } },
+  { name = "Codespaces / dev containers", tag = "General", description = "Reproducible cloud dev environments, devcontainer.json", targets = { DA = 0, DS = 1, DE = 3, AE = 2, ST = 0, RSE = 3, MLE = 3, DM = 0, LEAD = 1 } },
+  { name = "AI coding assistants (Copilot / Claude Code)", tag = "General", description = "Using assistants effectively; reviewing and verifying generated code", targets = { DE = 3, AE = 3, RSE = 3, MLE = 3, DM = 1 } },
+]
+
+[[categories]]
+name = "Data Architecture & Modelling"
+targets = { DA = 2, DS = 2, DE = 5, AE = 5, ST = 1, RSE = 2, MLE = 3, DM = 3, LEAD = 3 }
+skills = [
+  { name = "Relational modelling", tag = "General", description = "Normalisation, keys, constraints, ER diagrams" },
+  { name = "Dimensional modelling (Kimball star schema)", tag = "General", description = "Facts, dimensions, SCDs", targets = { DA = 3, AE = 8, RSE = 1, MLE = 2, DM = 2 } },
+  { name = "Tidy data principles", tag = "General", description = "One variable per column, one observation per row", targets = { DA = 5, DS = 5, DE = 3, AE = 3, ST = 5, RSE = 5, DM = 5 } },
+  { name = "Data Vault 2.0 / lakehouse patterns", tag = "General", description = "Hubs, links, satellites; medallion layers", targets = { DA = 0, DS = 1, AE = 3, ST = 0, RSE = 1, MLE = 2, DM = 2, LEAD = 2 } },
+]
+
+[[categories]]
+name = "ETL/ELT & Data Integration"
+targets = { DA = 2, DS = 2, DE = 5, AE = 5, ST = 1, RSE = 3, MLE = 3, DM = 3, LEAD = 2 }
+skills = [
+  { name = "Database connectivity from code", tag = "General", description = "DBI/odbc/dbplyr (R), SQLAlchemy/ADBC (Python); parameterised queries", targets = { DA = 3, DS = 3, ST = 2, DM = 2 } },
+  { name = "Pipeline orchestration & scheduling", tag = "General", description = "Airflow/Dagster/cron/Posit Connect schedules, idempotency", targets = { DA = 1, MLE = 5, DM = 1 } },
+  { name = "dbt / SQL transformation frameworks", tag = "General", description = "Models, tests, docs, lineage", targets = { DA = 1, DS = 1, AE = 8, ST = 0, RSE = 1, MLE = 2, DM = 1 } },
+  { name = "APIs (REST)", tag = "General", description = "httr2/plumber (R), httpx/FastAPI (Python); auth, pagination, rate limits", targets = { DS = 3, AE = 3, RSE = 5, MLE = 5, DM = 1 } },
+  { name = "Workflow managers (Nextflow / Snakemake)", tag = "General", description = "Reproducible multi-step pipelines, containers in workflows, running on HPC or in the cloud", targets = { DA = 0, DE = 3, AE = 1, MLE = 1, DM = 0, LEAD = 1 } },
+  { name = "Data validation & quality checks", tag = "General", description = "pointblank/validate (R), pandera / Great Expectations (Python), dbt tests; assertions in pipelines", targets = { DA = 3, DS = 3, ST = 3, DM = 5, LEAD = 3 } },
+]
+
+[[categories]]
+name = "Databases"
+targets = { DA = 1, DS = 2, DE = 5, AE = 5, ST = 1, RSE = 2, MLE = 3, DM = 2, LEAD = 2 }
+skills = [
+  { name = "Database administration (PostgreSQL / SQL Server)", tag = "General", description = "Installing, configuring, roles and permissions, backups, upgrades", targets = { DA = 0, DS = 1, AE = 3, ST = 0, DM = 1 } },
+  { name = "Query performance & indexing", tag = "General", description = "EXPLAIN plans, indexes, statistics, avoiding full scans", targets = { ST = 0, DM = 0, LEAD = 1 } },
+  { name = "Schema migrations & versioning", tag = "General", description = "Versioned DDL changes (Flyway, Liquibase, dbmate, sqitch)", targets = { DA = 0, DS = 1, AE = 3, ST = 0, RSE = 3, DM = 1, LEAD = 1 } },
+  { name = "Analytical engines & file formats (DuckDB / Parquet / Arrow)", tag = "General", description = "Columnar storage, partitioned datasets, in-process analytics", targets = { DA = 2, DS = 3, ST = 2, RSE = 3, MLE = 5, DM = 1 } },
+  { name = "Cloud data warehouses", tag = "General", description = "Snowflake, BigQuery, Synapse, Databricks SQL", targets = { DS = 1, ST = 0, RSE = 1, DM = 1 } },
+  { name = "Spatial databases (PostGIS)", tag = "General", description = "Spatial types, indexes and queries in the database", targets = { DA = 0, DS = 1, DE = 3, AE = 1, MLE = 1, DM = 0, LEAD = 1 } },
+  { name = "NoSQL & document stores", tag = "General", description = "MongoDB, key-value stores, JSON columns; when not to use relational", targets = { DA = 0, DS = 1, DE = 3, AE = 1, ST = 0, DM = 0, LEAD = 1 } },
+]
+
+[[categories]]
+name = "Data Analysis & Visualisation"
+targets = { DA = 5, DS = 5, DE = 2, AE = 3, ST = 5, RSE = 3, MLE = 2, DM = 2, LEAD = 3 }
+skills = [
+  { name = "Exploratory data analysis", tag = "General", description = "Summaries, distributions, outliers, missingness" },
+  { name = "Dashboards & BI tools", tag = "General", description = "Shiny (R/Python), Streamlit, Dash, Power BI, Tableau; KPI design", targets = { DS = 3, DE = 1, ST = 2, MLE = 1 } },
+  { name = "Visual design & accessible charts", tag = "General", description = "Choosing chart types, colour, alt text, clarity", targets = { DS = 3, DE = 1, AE = 2, ST = 3, RSE = 2, MLE = 1, DM = 1 } },
+]
+
+[[categories]]
+name = "Statistics & Machine Learning"
+targets = { DA = 2, DS = 5, DE = 1, AE = 1, ST = 5, RSE = 2, MLE = 5, DM = 1, LEAD = 2 }
+skills = [
+  { name = "Inferential statistics", tag = "General", description = "Hypothesis tests, confidence intervals, power, study design", targets = { DA = 3, ST = 8, MLE = 3 } },
+  { name = "Regression & mixed models", tag = "General", description = "lm/glm, lme4/glmmTMB (R), statsmodels (Python); model diagnostics", targets = { ST = 8, MLE = 3 } },
+  { name = "Bayesian methods", tag = "General", description = "brms/Stan (R), PyMC (Python); priors, posterior checks", targets = { DA = 0, DS = 3, DE = 0, AE = 0, RSE = 1, MLE = 2, DM = 0, LEAD = 1 } },
+  { name = "Machine learning concepts", tag = "General", description = "Supervised/unsupervised learning, resampling, tuning, evaluation (tidymodels in R, scikit-learn in Python)", targets = { DA = 1, ST = 3, MLE = 8, DM = 0 } },
+  { name = "Time series & forecasting", tag = "General", description = "fable/forecast (R), statsmodels/sktime (Python); seasonality, evaluation", targets = { DS = 3, RSE = 1, MLE = 3, DM = 0, LEAD = 1 } },
+  { name = "MLOps & model deployment", tag = "General", description = "vetiver (R/Python), MLflow; model versioning, monitoring drift", targets = { DA = 0, DS = 2, DE = 3, ST = 0, RSE = 3, MLE = 8, DM = 0 } },
+]
+
+[[categories]]
+name = "Cloud & Infrastructure"
+targets = { DA = 1, DS = 2, DE = 5, AE = 3, ST = 1, RSE = 3, MLE = 5, DM = 1, LEAD = 2 }
+skills = [
+  { name = "Posit Connect / Workbench", tag = "General", description = "Deploying R and Python apps, reports and APIs; scheduling; access control", targets = { DA = 2, DS = 3, DE = 3, ST = 2, RSE = 5, MLE = 3, LEAD = 3 } },
+  { name = "Containers (Docker)", tag = "General", description = "Dockerfiles, rocker / Python base images, reproducible runtime", targets = { DA = 0, RSE = 5, DM = 0 } },
+  { name = "Cloud storage & compute", tag = "General", description = "Azure / AWS S3 / Snowflake / Databricks" },
+  { name = "HPC & batch computing", tag = "General", description = "Clusters, job schedulers (Slurm), batchtools/mirai (R), dask/submitit (Python)", targets = { DA = 0, DE = 3, AE = 1, ST = 2, MLE = 3, DM = 0, LEAD = 1 } },
+]
+
+[[categories]]
+name = "Linux System Administration"
+targets = { DA = 0, DS = 1, DE = 3, AE = 2, ST = 1, RSE = 3, MLE = 3, DM = 0, LEAD = 1 }
+skills = [
+  { name = "Linux fundamentals & filesystem", tag = "General", description = "Filesystem layout, navigation, permissions (chmod/chown), links", targets = { DA = 1, DS = 2, DE = 5, AE = 3, ST = 2, RSE = 5, MLE = 5, DM = 1, LEAD = 2 } },
+  { name = "Users, groups & sudo", tag = "General", description = "Account management, group permissions, sudoers", targets = { ST = 0, DM = 1, LEAD = 2 } },
+  { name = "Package management & system dependencies", tag = "General", description = "apt/dnf, installing R (rig) and Python (uv), system libraries for packages (libcurl, GDAL)", targets = { DS = 2, RSE = 5 } },
+  { name = "Services & systemd", tag = "General", description = "Unit files, starting/enabling services, journalctl" },
+  { name = "Scheduling (cron / systemd timers)", tag = "General", description = "Running scripts and pipelines on a schedule", targets = { DA = 1, DS = 2, DE = 5, AE = 3, MLE = 5 } },
+  { name = "Process & resource monitoring", tag = "General", description = "top/htop, ps, kill, df/du, free, finding runaway jobs", targets = { DS = 2, DE = 5, AE = 3, MLE = 5 } },
+  { name = "Networking & SSH", tag = "General", description = "SSH keys and config, scp/rsync, ports, firewalls, DNS basics", targets = { DS = 2, DE = 5, AE = 3, MLE = 5, LEAD = 2 } },
+  { name = "Text processing (grep / sed / awk / jq)", tag = "General", description = "Filtering and transforming files and logs on the command line", targets = { DA = 1, DS = 2, DE = 5, AE = 3, DM = 1 } },
+  { name = "Storage, mounts & network shares", tag = "General", description = "Disks, mounting, NFS/SMB shares, quotas", targets = { ST = 0, RSE = 2, DM = 1 } },
+  { name = "Logs & troubleshooting", tag = "General", description = "Reading system and application logs, diagnosing failures", targets = { DE = 5, AE = 3, ST = 0, MLE = 5 } },
+  { name = "Security hardening & patching", tag = "General", description = "Updates, SELinux/AppArmor, fail2ban, TLS certificates", targets = { DS = 0, ST = 0, RSE = 2, DM = 1, LEAD = 2 } },
+  { name = "Backup & recovery", tag = "General", description = "rsync/restic, snapshots, testing restores", targets = { ST = 0, RSE = 2, DM = 3, LEAD = 2 } },
+  { name = "Web servers & reverse proxies (nginx)", tag = "General", description = "Hosting Shiny Server / Posit products behind a proxy, TLS termination", targets = { AE = 1, ST = 0 } },
+  { name = "Configuration management (Ansible)", tag = "General", description = "Repeatable server setup as code", targets = { DS = 0, ST = 0, RSE = 2 } },
+  { name = "Terminal tools (tmux / vim)", tag = "General", description = "Long-running remote sessions, editing files on servers", targets = { DS = 2 } },
+]
+
+[[categories]]
+name = "Data Governance & Security"
+targets = { DA = 2, DS = 2, DE = 3, AE = 3, ST = 2, RSE = 3, MLE = 3, DM = 5, LEAD = 3 }
+skills = [
+  { name = "Documentation & metadata (FAIR)", tag = "General", description = "Data dictionaries, codebooks, README, FAIR principles", targets = { DA = 3, DS = 3, AE = 5, ST = 3, DM = 8 } },
+  { name = "Privacy & regulation (GDPR)", tag = "General", description = "Personal data handling, anonymisation, DPIAs", targets = { ST = 3, RSE = 2, LEAD = 5 } },
+  { name = "Secrets management", tag = "General", description = ".Renviron / .env files, keyring, GitHub secrets; never commit credentials", targets = { DS = 3, DE = 5, AE = 5, RSE = 5, MLE = 5, DM = 2 } },
+  { name = "Access control & data classification", tag = "General", description = "Least privilege, sensitivity levels, audit", targets = { DA = 1, DS = 1, ST = 1, RSE = 2 } },
+]
+
+[[categories]]
+name = "Open Science & Reproducibility"
+targets = { DA = 2, DS = 2, DE = 1, AE = 1, ST = 3, RSE = 3, MLE = 1, DM = 3, LEAD = 2 }
+skills = [
+  { name = "Reproducible research practices", tag = "General", description = "Scripted analyses end to end, version-controlled code, environments captured", targets = { DA = 3, DS = 5, DE = 2, AE = 3, ST = 5, RSE = 5, MLE = 3, LEAD = 3 } },
+  { name = "Software licensing", tag = "General", description = "Choosing and complying with licences (MIT, GPL, CC-BY); dependency licences", targets = { DA = 1, DS = 1, DE = 2, AE = 2, ST = 1, RSE = 5, MLE = 2, DM = 2, LEAD = 3 } },
+  { name = "Citable code & data (DOIs / CITATION.cff)", tag = "General", description = "Zenodo archiving, DOIs for releases, citation metadata", targets = { DA = 1, RSE = 5, MLE = 2 } },
+  { name = "Open data publishing & repositories", tag = "General", description = "Depositing datasets with metadata in Zenodo, Dryad or domain repositories", targets = { DA = 1, DM = 5 } },
+  { name = "Data management plans", tag = "General", description = "Writing and maintaining DMPs for projects and funders", targets = { DA = 1, DE = 2, AE = 2, RSE = 2, DM = 8, LEAD = 3 } },
+  { name = "Metadata standards & ontologies", tag = "General", description = "Controlled vocabularies, schema.org/DCAT, community standards", targets = { DA = 1, DS = 1, DE = 2, AE = 2, ST = 2, RSE = 2, DM = 5, LEAD = 1 } },
+  { name = "Preregistration & open peer review", tag = "General", description = "Registered analysis plans, sharing code for review", targets = { DA = 0, DE = 0, AE = 0, RSE = 1, MLE = 0, DM = 1, LEAD = 1 } },
+]
+
+[[categories]]
+name = "DevOps, Testing & Automation"
+targets = { DA = 1, DS = 3, DE = 5, AE = 5, ST = 2, RSE = 5, MLE = 5, DM = 1, LEAD = 2 }
+skills = [
+  { name = "Code style & linting", tag = "General", description = "lintr/styler (R), ruff (Python), style guides, pre-commit hooks", targets = { DA = 2, DE = 3, AE = 3, MLE = 3 } },
+  { name = "Automated testing strategy", tag = "General", description = "Unit, integration and data tests; test-driven habits" },
+  { name = "Monitoring & logging", tag = "General", description = "Logging (logger in R, logging in Python), alerting, pipeline health, performance tuning", targets = { DA = 0, DS = 1, AE = 3, ST = 0, RSE = 3 } },
+]
+
+[[categories]]
+name = "Communication & Storytelling"
+targets = { DA = 5, DS = 5, DE = 2, AE = 3, ST = 5, RSE = 3, MLE = 2, DM = 3, LEAD = 5 }
+skills = [
+  { name = "Presenting results", tag = "General", description = "Telling a clear story to non-technical audiences" },
+  { name = "Technical writing", tag = "General", description = "Reports, documentation, vignettes, READMEs", targets = { DA = 3, DS = 3, DE = 3, RSE = 5, MLE = 3, DM = 5, LEAD = 3 } },
+  { name = "Teaching & mentoring", tag = "General", description = "Pairing, running workshops, onboarding colleagues", targets = { DA = 2, DS = 3, AE = 2, ST = 3, RSE = 5, DM = 2, LEAD = 8 } },
+]
+
+[[categories]]
+name = "Domain Knowledge & Business Acumen"
+targets = { DA = 5, DS = 3, DE = 2, AE = 3, ST = 3, RSE = 2, MLE = 2, DM = 3, LEAD = 5 }
+skills = [
+  { name = "Domain knowledge", tag = "General", description = "Understanding the subject area the data describes" },
+  { name = "Requirements gathering", tag = "General", description = "Turning vague questions into analysable problems", targets = { DE = 3, AE = 5, RSE = 3 } },
+]
+
+[[categories]]
+name = "Collaboration & Stakeholder Mgmt"
+targets = { DA = 3, DS = 3, DE = 3, AE = 3, ST = 3, RSE = 3, MLE = 3, DM = 3, LEAD = 5 }
+skills = [
+  { name = "Stakeholder management", tag = "General", description = "Expectations, priorities, saying no constructively", targets = { DE = 2, RSE = 2, MLE = 2, LEAD = 8 } },
+  { name = "Agile ways of working", tag = "General", description = "Sprints, kanban, estimation, retrospectives" },
+]

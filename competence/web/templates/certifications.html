@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "macros.html" import team_filter %}
+{% block title %}Certifications · Competence{% endblock %}
+{% block crumbs %}<span class="crumb">Certifications</span>{% endblock %}
+{% block content %}
+<h1>Certifications <span class="muted">· as of {{ t.today }}</span> <a class="help-link" href="/guide#certifications" title="How certifications work" aria-label="How certifications work">?</a></h1>
+{{ team_filter(teams, team, link) }}
+<p class="help">Yes/no qualifications with an expiry date. <strong>Missing</strong> = the person's role requires it
+  (their role in their latest assessment) and they have never had it. <strong>Expiring soon</strong> = within
+  {{ expiring_days }} days. Click a name to record or renew. Manage the list in
+  <a href="/admin/certifications">Admin → Certifications</a>.</p>
+
+{% if not t.certs %}
+<p class="notice">No certifications yet. <a href="/admin/certifications/new">Add the first one</a>.</p>
+{% else %}
+
+<h2>Needs attention</h2>
+{% if t.attention %}
+<table class="data">
+  <thead><tr><th>Person</th><th>Certification</th><th>Status</th><th>Expires</th></tr></thead>
+  <tbody>{% for x in t.attention %}
+    <tr><td><a href="/people/{{ x.person.id }}/certifications#cert-{{ x.cert.id }}">{{ x.person.name }}</a></td>
+      <td>{{ x.cert.name }}</td>
+      <td><span class="cert cert-{{ x.status }}">{{ status_labels[x.status] }}</span></td>
+      <td>{{ x.record.expires_on if x.record and x.record.expires_on else "–" }}</td></tr>
+  {% endfor %}</tbody>
+</table>
+{% else %}<p>Nothing missing, expired or expiring.</p>{% endif %}
+
+<h2>By certification</h2>
+<table class="data">
+  <thead><tr><th>Certification</th><th>Valid for</th><th>Required by</th>
+    <th class="num">Valid</th><th class="num">Expiring</th><th class="num">Expired</th><th class="num">Missing</th><th>Flag</th></tr></thead>
+  <tbody>{% for s in t.certs %}
+    <tr><td>{{ s.cert.name }}<small>{{ s.cert.description }}</small></td>
+      <td>{{ "%d months"|format(s.cert.valid_months) if s.cert.valid_months else "no expiry" }}</td>
+      <td>{% for r in s.cert.required_by %}{{ roles[r] }}{% if not loop.last %}, {% endif %}{% else %}<span class="muted">–</span>{% endfor %}</td>
+      {% for st in ("valid", "expiring", "expired", "missing") %}<td class="num">{{ s.counts[st] }}</td>{% endfor %}
+      <td>{% if s.nobody_holds_it %}<span class="flag flag-team-gap" title="No active person has a valid one">Nobody holds it</span>{% endif %}</td></tr>
+  {% endfor %}</tbody>
+</table>
+
+<h2>Who holds what</h2>
+{% if t.people %}
+<div class="table-wrap">
+<table class="data certs-grid">
+  <thead><tr><th>Person</th>{% for s in t.certs %}<th>{{ s.cert.name }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for p in t.people %}
+    <tr><th scope="row"><a href="/people/{{ p.id }}/certifications">{{ p.name }}</a></th>
+    {% for s in t.certs %}{% set status, rec = t.cells[(p.id, s.cert.id)] %}
+      <td{% if status %} class="cert-{{ status }}"{% endif %} title="{{ status_labels[status] if status else 'Not held, not required' }}">
+        {%- if rec %}{{ ("expired " if status == "expired" else "until ") ~ rec.expires_on if rec.expires_on else "✓" }}{% elif status %}{{ status_labels[status] }}{% else %}<span class="muted">–</span>{% endif -%}
+      </td>
+    {% endfor %}</tr>
+  {% endfor %}</tbody>
+</table>
+</div>
+{% else %}<p class="muted">No active people.</p>{% endif %}
+{% endif %}
+{% endblock %}

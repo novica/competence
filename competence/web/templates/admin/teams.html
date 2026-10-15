@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Teams · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Teams</span>{% endblock %}
+{% block content %}
+<h1>Teams</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">Several teams can share this database: the same skills, roles and targets. A person's team is recorded
+  per round, like their role, and chosen when their assessment starts (or changed later on the round page). With two
+  or more teams, the front page, people, team overview, heatmap, compare and certifications can be filtered by team.
+  A retired team keeps its history and can still be filtered on, but new assessments can't use it.</p>
+<p class="help">Choose the categories each team uses: its rating forms and its team views then only show those
+  skills, so its figures aren't drowned by skills it never uses. A team with none chosen uses all of them.
+  The "Everyone" views always count every skill.</p>
+
+{% if teams %}
+<table class="data admin">
+  <thead><tr><th>Team</th><th>Categories used</th><th class="num">Assessments</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for t in teams %}
+  <tr{% if t.retired_on %} class="retired"{% endif %}>
+    <td><form method="post" action="/admin/teams/{{ t.id }}" class="inline">
+      <input name="name" value="{{ t.name }}" required maxlength="120" aria-label="Name"><button class="secondary">Rename</button></form></td>
+    <td><a href="/admin/teams/{{ t.id }}/categories">{% if chosen[t.id] %}{{ chosen[t.id] }} of {{ n_categories }}{% else %}all {{ n_categories }}{% endif %}</a></td>
+    <td class="num">{{ counts.get(t.id, 0) }}</td>
+    <td>{% if t.retired_on %}retired {{ t.retired_on }}{% else %}active{% endif %}</td>
+    <td>{% if t.retired_on %}
+      <form method="post" action="/admin/teams/{{ t.id }}/unretire"><button class="secondary">Un-retire</button></form>
+      {% else %}
+      <form method="post" action="/admin/teams/{{ t.id }}/retire"><button class="secondary">Retire</button></form>
+      {% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="muted">No teams yet: everyone is one team.</p>{% endif %}
+
+<h2>Add a team</h2>
+<form method="post" action="/admin/teams" class="inline">
+  <label>Name <input name="name" required maxlength="120"></label>
+  <button>Add team</button>
+</form>
+{% endblock %}

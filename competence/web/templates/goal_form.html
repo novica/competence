@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit goal" if goal else "New goal" }} · {{ a.person.name }} · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/round/{{ a.round.id }}">{{ a.round.label }}</a><a class="crumb" href="/round/{{ a.round.id }}/person/{{ a.person.id }}/profile">{{ a.person.name }}</a><span class="crumb">{{ "Edit goal" if goal else "New goal" }}</span>{% endblock %}
+{% block content %}
+<h1>{{ "Edit goal" if goal else "New development goal" }} <span class="muted">· {{ a.person.name }}</span></h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="post" action="{{ '/goal/%d' % goal.id if goal else '/round/%d/person/%d/goals' % (a.round.id, a.person.id) }}" class="stacked">
+  {% if goal %}<input type="hidden" name="round_id" value="{{ a.round.id }}">{% endif %}
+  <label>Goal <input name="title" required maxlength="200" value="{{ v.title }}" size="60"></label>
+
+  <label>Skill
+    {% if goal %}
+      <input value="{{ goal.skill_name or 'General goal' }}" disabled>
+      <small>The skill can't be changed; set a new goal instead.</small>
+    {% else %}
+    <select name="skill_id">
+      <option value="">General goal (no skill)</option>
+      {% for r in skills %}<option value="{{ r.skill_id }}"{% if r.skill_id == v.skill_id %} selected{% endif %}>{{ r.category }} — {{ r.name }}{% if r.target is not none %} (target {{ r.target }}){% endif %}</option>{% endfor %}
+    </select>
+    {% endif %}
+  </label>
+
+  <label>Target level
+    <select name="target_level">
+      <option value="">–</option>
+      {% for l in levels %}<option value="{{ l }}"{% if v.target_level == l %} selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+    <small>Progress is measured from ratings: level used in each round against this target.</small>
+  </label>
+
+  <label>Due round
+    <select name="due_round_id">
+      <option value="">No deadline</option>
+      {% for r in rounds %}<option value="{{ r.id }}"{% if r.id == v.due_round_id %} selected{% endif %}>{{ r.label }}</option>{% endfor %}
+    </select>
+  </label>
+
+  {% if goal %}
+  <label>Status
+    <select name="status">
+      {% for key, label in statuses.items() %}<option value="{{ key }}"{% if key == v.status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </label>
+  {% endif %}
+
+  <label>Actions <textarea name="actions" rows="4" maxlength="2000" placeholder="Course, pairing, project…">{{ v.actions }}</textarea></label>
+  <label>Notes <textarea name="notes" rows="3" maxlength="2000">{{ v.notes }}</textarea></label>
+
+  <p><button>{{ "Save goal" if goal else "Add goal" }}</button>
+     <a href="/round/{{ a.round.id }}/person/{{ a.person.id }}/profile#goals">Cancel</a></p>
+</form>
+{% endblock %}

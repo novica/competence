@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Certifications · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Certifications</span>{% endblock %}
+{% block content %}
+<h1>Certifications</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">Qualifications that are held or not, often with an expiry date: safety training, licences, cloud or
+  security certifications. Records are kept on each person's certifications page (see
+  <a href="/certifications">Certifications</a>). Anything with records is retired, never deleted.</p>
+<p><a href="/admin/certifications/new">Add a certification</a></p>
+
+{% if certs %}
+<table class="data admin">
+  <thead><tr><th>Certification</th><th>Valid for</th><th>Required by</th><th class="num">Records</th><th>Status</th><th></th></tr></thead>
+  <tbody>{% for c in certs %}
+  <tr id="cert-{{ c.id }}"{% if c.retired_on %} class="retired"{% endif %}>
+    <td><a href="/admin/certifications/{{ c.id }}/edit">{{ c.name }}</a><small>{{ c.description }}</small></td>
+    <td>{{ "%d months"|format(c.valid_months) if c.valid_months else "no expiry" }}</td>
+    <td>{% for r in c.required_by %}{{ roles[r] }}{% if not loop.last %}, {% endif %}{% else %}<span class="muted">–</span>{% endfor %}</td>
+    <td class="num">{{ c.records }}</td>
+    <td>{% if c.retired_on %}retired {{ c.retired_on }}{% else %}active{% endif %}</td>
+    <td class="actions-cell">
+      {% if c.retired_on %}
+      <form method="post" action="/admin/certifications/{{ c.id }}/unretire"><button class="secondary">Un-retire</button></form>
+      {% else %}
+      <form method="post" action="/admin/certifications/{{ c.id }}/retire"><button class="secondary">Retire</button></form>
+      {% endif %}
+      {% if not c.records %}
+      <form method="post" action="/admin/certifications/{{ c.id }}/delete" onsubmit='return confirm({{ ("Delete " ~ c.name ~ " for good? Nobody has a record of it.")|tojson }})'>
+        <button class="danger">Delete</button></form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}</tbody>
+</table>
+{% else %}<p class="muted">None yet.</p>{% endif %}
+{% endblock %}

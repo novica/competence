@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit certification" if cert else "Add certification" }} · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><a class="crumb" href="/admin/certifications">Certifications</a><span class="crumb">{{ cert.name if cert else "Add" }}</span>{% endblock %}
+{% block content %}
+<h1>{{ "Edit certification" if cert else "Add a certification" }}</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+{% if cert %}<p class="help">Renaming keeps all {{ cert.records }} records. Changing how long it's valid only affects
+  records added from now on; existing expiry dates stay as they are.</p>{% endif %}
+
+<form method="post" action="{{ '/admin/certifications/%d' % cert.id if cert else '/admin/certifications' }}" class="stacked">
+  <label>Name <input name="name" required maxlength="120" value="{{ v.name }}"></label>
+  <label>Description <input name="description" maxlength="500" value="{{ v.description }}" size="70"></label>
+  <label>Valid for (months) <input name="valid_months" type="number" min="1" max="600" value="{{ v.valid_months if v.valid_months is not none else '' }}">
+    <small>Blank = never expires. Used to work out the expiry date when a record is added.</small></label>
+  <fieldset>
+    <legend>Required for</legend>
+    <p class="muted">People whose latest assessment is in one of these roles show it as missing until they have it.</p>
+    {% for r in roles %}
+    <label class="check"><input type="checkbox" name="role_id" value="{{ r.id }}"{% if r.id in v.role_id %} checked{% endif %}> {{ r.name }}{% if r.retired_on %} <span class="muted">(retired)</span>{% endif %}</label>
+    {% endfor %}
+  </fieldset>
+  <p><button>{{ "Save" if cert else "Add certification" }}</button> <a href="/admin/certifications">Cancel</a></p>
+</form>
+{% endblock %}

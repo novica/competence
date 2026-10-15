@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Compare rounds · Competence{% endblock %}
+{% block crumbs %}<span class="crumb">Compare rounds</span>{% endblock %}
+{% block content %}
+<h1>Compare rounds</h1>
+
+<form method="get" action="/compare" class="inline" aria-label="Choose what to compare">
+  <label>From <select name="from">
+    {% for r in rounds %}<option value="{{ r.id }}"{% if r.id == from_id %} selected{% endif %}>{{ r.label }}</option>{% endfor %}
+  </select></label>
+  <label>To <select name="to">
+    {% for r in rounds %}<option value="{{ r.id }}"{% if r.id == to_id %} selected{% endif %}>{{ r.label }}</option>{% endfor %}
+  </select></label>
+  <label>Who <select name="person">
+    <option value="">Whole team</option>
+    {% for p in people %}<option value="{{ p.id }}"{% if p.id == person_id %} selected{% endif %}>{{ p.name }}</option>{% endfor %}
+  </select></label>
+  {% if teams|length > 1 %}<label>Team <select name="team">
+    <option value="">Everyone</option>
+    {% for t in teams %}<option value="{{ t.id }}"{% if t.id == team %} selected{% endif %}>{{ t.name }}</option>{% endfor %}
+  </select></label>{% endif %}
+  {% if tags|length > 1 %}<label>Tag <select name="tag">
+    <option value="">All</option>
+    {% for t in tags %}<option{% if t == tag %} selected{% endif %}>{{ t }}</option>{% endfor %}
+  </select></label>{% endif %}
+  <label><input type="checkbox" name="changed" value="true"{% if changed %} checked{% endif %}> Only changed skills</label>
+  <a class="help-link" href="/guide#compare" title="What counts as changed" aria-label="What counts as changed">?</a>
+  <button>Compare</button>
+</form>
+
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+{% macro series(values) -%}
+  {%- for v in values %}{% if v is none %}<span class="muted">–</span>{% else %}{{ v|num }}{% endif %}{% if not loop.last %} → {% endif %}{% endfor -%}
+{%- endmacro %}
+{% macro change(d, decimals=1) -%}
+  {%- if d is not none %}{% set r = d|round(decimals) %}<span class="{{ 'good' if r > 0 else 'bad' if r < 0 else 'muted' }}">{{ d|signed(decimals) }}</span>{% endif -%}
+{%- endmacro %}
+
+{% if cmp %}{% set b, a = cmp.before, cmp.after %}
+<p class="muted">Team, {{ cmp.before_round.label }} → {{ cmp.after_round.label }}. Both rounds use today's skills and targets.
+  Trend columns run oldest to newest: {{ cmp.rounds|map(attribute="label")|join(" → ") }}.
+  Levels and desire are medians, which move in steps: a few people improving may not change them, so small changes
+  can be missing from the lists below (<a href="/guide#medians">why medians</a>).</p>
+
+<table class="data compact">
+  <thead><tr><th></th><th class="num">{{ cmp.before_round.label }}</th><th class="num">{{ cmp.after_round.label }}</th><th class="num">Change</th></tr></thead>
+  <tbody>
+  {% for label, field, better in [("People assessed", "people_assessed", 1), ("At or above role target (%)", "pct_at_target", 1),
+                                  ("Priority-weighted shortfall per person", "weighted_shortfall_per_person", -1), ("Team gaps", "team_gaps", -1),
+                                  ("Below expert target", "below_expert_target", -1), ("Key-person risks", "key_person_risks", -1),
+                                  ("Median competency", "median_competency", 1)] %}
+    {% set d = a.delta(b, field) %}
+    <tr><td>{{ label }}</td><td class="num">{{ b[field]|num(0) }}</td><td class="num">{{ a[field]|num(0) }}</td>
+      <td class="num">{% if d is not none %}<span class="{{ 'muted' if d == 0 else 'good' if d * better > 0 else 'bad' }}">{{ d|signed(0) }}</span>{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<div class="two-col">
+  <section><h2>Biggest improvements</h2>
+    {% if cmp.improvements %}<table class="data"><thead><tr><th>Skill</th><th class="num">Median level</th><th class="num">Change</th></tr></thead><tbody>
+    {% for r in cmp.improvements %}<tr><td>{{ r.name }}<small>{{ r.category }}</small></td>
+      <td class="num">{{ r.before.median_level|num }} → {{ r.after.median_level|num }}</td><td class="num">{{ change(r.level_delta) }}</td></tr>{% endfor %}
+    </tbody></table>{% else %}<p class="muted">None.</p>{% endif %}
+  </section>
+  <section><h2>Biggest declines</h2>
+    {% if cmp.declines %}<table class="data"><thead><tr><th>Skill</th><th class="num">Median level</th><th class="num">Change</th></tr></thead><tbody>
+    {% for r in cmp.declines %}<tr><td>{{ r.name }}<small>{{ r.category }}</small></td>
+      <td class="num">{{ r.before.median_level|num }} → {{ r.after.median_level|num }}</td><td class="num">{{ change(r.level_delta) }}</td></tr>{% endfor %}
+    </tbody></table>{% else %}<p class="muted">None.</p>{% endif %}
+  </section>
+</div>
+
+{% if cmp.first_rated or cmp.retired_between %}
+<section><h2>Skills that came and went</h2>
+  {% if cmp.first_rated %}<p><strong>Rated in {{ cmp.after_round.label }} but not in {{ cmp.before_round.label }}</strong> (new skills, or skills nobody rated then):
+    {{ cmp.first_rated|map(attribute="name")|join(", ") }}</p>{% endif %}
+  {% if cmp.retired_between %}<p><strong>Retired in between</strong> (left out of the figures above):
+    {% for name, on in cmp.retired_between %}{{ name }} <span class="muted">({{ on }})</span>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</section>
+{% endif %}
+
+<h2>Per skill</h2>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Skill</th><th class="num">Median level</th><th class="num">Δ</th><th class="num">Median desire</th><th class="num">3+</th><th class="num">5+</th><th class="num">Weighted shortfall</th><th>Trend (median level)</th></tr></thead>
+  <tbody>
+  {% for r in cmp.rows if r.rated_in_either and (not changed or r.changed) %}
+  <tr><td>{{ r.name }} {{ r.tag|tag_badge }}<small>{{ r.category }}</small></td>
+    <td class="num">{{ r.before.median_level|num }} → {{ r.after.median_level|num }}</td>
+    <td class="num">{{ change(r.level_delta) }}</td>
+    <td class="num">{{ r.before.median_desire|num }} → {{ r.after.median_desire|num }}</td>
+    <td class="num">{{ r.before.n3 }} → {{ r.after.n3 }}</td>
+    <td class="num">{{ r.before.n5 }} → {{ r.after.n5 }}</td>
+    <td class="num">{{ r.before.weighted_shortfall }} → {{ r.after.weighted_shortfall }}</td>
+    <td class="trend">{{ series(r.trend) }}</td></tr>
+  {% else %}<tr><td colspan="8" class="muted">No skills to show.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+
+{% if pcmp %}
+<p class="muted">{{ pcmp.person.name }}, {{ pcmp.before_round.label }}{% if pcmp.before %} ({{ pcmp.before.role.name }}){% else %} (not assessed){% endif %}
+  → {{ pcmp.after_round.label }}{% if pcmp.after %} ({{ pcmp.after.role.name }}){% else %} (not assessed){% endif %}.
+  Targets are for the role in {{ pcmp.after_round.label }}. Trend: {{ pcmp.rounds|map(attribute="label")|join(" → ") }}.</p>
+{% if pcmp.after %}<p><a href="/round/{{ pcmp.after_round.id }}/person/{{ pcmp.person.id }}/profile">Profile in {{ pcmp.after_round.label }}</a></p>{% endif %}
+
+<div class="two-col">
+  <section><h2>Biggest improvements</h2>
+    {% if pcmp.improvements %}<table class="data"><thead><tr><th>Skill</th><th class="num">Level</th><th class="num">Change</th></tr></thead><tbody>
+    {% for r in pcmp.improvements %}<tr><td>{{ r.name }}<small>{{ r.category }}</small></td>
+      <td class="num">{{ r.before_used|num }} → {{ r.after_used|num }}</td><td class="num">{{ change(r.level_delta, 0) }}</td></tr>{% endfor %}
+    </tbody></table>{% else %}<p class="muted">None.</p>{% endif %}
+  </section>
+  <section><h2>Biggest declines</h2>
+    {% if pcmp.declines %}<table class="data"><thead><tr><th>Skill</th><th class="num">Level</th><th class="num">Change</th></tr></thead><tbody>
+    {% for r in pcmp.declines %}<tr><td>{{ r.name }}<small>{{ r.category }}</small></td>
+      <td class="num">{{ r.before_used|num }} → {{ r.after_used|num }}</td><td class="num">{{ change(r.level_delta, 0) }}</td></tr>{% endfor %}
+    </tbody></table>{% else %}<p class="muted">None.</p>{% endif %}
+  </section>
+</div>
+
+<h2>Per skill</h2>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Skill</th><th class="num">Level</th><th class="num">Δ</th><th class="num">Desire</th><th class="num">Target</th><th>Trend (level used)</th></tr></thead>
+  <tbody>
+  {% for r in pcmp.rows if (r.trend|select("ne", none)|list or r.before_desire is not none or r.after_desire is not none) and (not changed or r.changed) %}
+  <tr><td>{{ r.name }} {{ r.tag|tag_badge }}<small>{{ r.category }}</small></td>
+    <td class="num">{{ r.before_used|num }} → {{ r.after_used|num }}</td>
+    <td class="num">{{ change(r.level_delta, 0) }}</td>
+    <td class="num">{{ r.before_desire|num }} → {{ r.after_desire|num }}</td>
+    <td class="num">{{ r.target|num }}</td>
+    <td class="trend">{{ series(r.trend) }}</td></tr>
+  {% else %}<tr><td colspan="6" class="muted">No skills to show.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+{% endblock %}

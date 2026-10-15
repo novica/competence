@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "macros.html" import everyone_note, headline_tiles, team_filter, team_name %}
+{% block content %}
+{% set pr, ov = d.progress, d.overview %}
+<p class="lede">Skill levels, interests and certifications for your team, round by round.
+  New here? Read <a href="/guide">the guide</a>.</p>
+{% set tq = "&team=%d"|format(team) if team else "" %}
+{{ team_filter(teams, team, link) }}
+
+{% if pr and not pr.complete and pr.people %}
+<div class="notice progress-bar" role="status">
+  <strong>{{ pr.round.label }} in progress:</strong> {{ pr.assessed }} of {{ pr.people }} assessed
+  {%- if pr.started %} · {{ pr.started }} started, nothing rated yet{% endif %}
+  {%- if pr.not_started %} · {{ pr.not_started }} not started{% endif %}
+  <a class="button" href="/round/{{ pr.round.id }}">Continue the round</a>
+</div>
+{% endif %}
+
+{% if d.getting_started %}
+<section class="notice" aria-labelledby="start">
+  <h2 id="start">Getting started</h2>
+  <ol>
+    <li{% if d.skills %} class="done"{% endif %}><strong>Skills, roles and targets.</strong>
+      {% if d.skills %}{{ d.skills }} skills are ready; review them in <a href="/admin">Admin</a> before the first round.
+      {% else %}None yet: add them in <a href="/admin/skills">Admin → Skills</a>, or seed from a catalogue file.{% endif %}
+      <a href="/guide#catalogue">How</a></li>
+    <li{% if d.people %} class="done"{% endif %}><strong>People.</strong> Add everyone who will be assessed in <a href="/admin/people">Admin → People</a>.</li>
+    <li{% if d.rounds %} class="done"{% endif %}><strong>The first round.</strong> Give it a label and a date on the <a href="/rounds">Rounds</a> page, then
+      start each person's assessment. <a href="/guide#round">How a round works</a></li>
+  </ol>
+</section>
+{% endif %}
+
+{% if ov %}
+<section aria-labelledby="state">
+  <h1 id="state">{{ team_name(teams, team) if team else "The team" }} in {{ ov.round.label }}{% if ov.round.held_on %} <span class="muted">{{ ov.round.held_on }}</span>{% endif %}</h1>
+  {{ headline_tiles(ov) }}
+  {{ everyone_note(teams, team) }}
+  <p><a href="/round/{{ ov.round.id }}/team?{{ tq[1:] }}">Team overview</a> · <a href="/round/{{ ov.round.id }}/heatmap?{{ tq[1:] }}">Heatmap</a>
+    {%- if ov.previous_round %} · <a href="/compare?from={{ ov.previous_round.id }}&amp;to={{ ov.round.id }}{{ tq }}">Compare with {{ ov.previous_round.label }}</a>{% endif %}
+    · <a href="/guide#numbers">What these mean</a></p>
+</section>
+
+<section aria-labelledby="attention">
+  <h2 id="attention">Needs attention</h2>
+  <ul class="attention">
+    <li><a href="/round/{{ ov.round.id }}/team?sort=flag&amp;dir=asc{{ tq }}"><strong>{{ d.flagged }}</strong> skill{{ "s" if d.flagged != 1 }} with a flag</a>
+      <span class="muted">team gaps, below expert target, key-person risks</span></li>
+    {% if d.certs %}<li><a href="/certifications?{{ tq[1:] }}"><strong>{{ d.cert_attention }}</strong> certification{{ "s" if d.cert_attention != 1 }} missing, expired or expiring</a></li>{% endif %}
+    <li><strong>{{ ov.open_goals }}</strong> open development goal{{ "s" if ov.open_goals != 1 }}
+      <span class="muted">on each person's profile</span></li>
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

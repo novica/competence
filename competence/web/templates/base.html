@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Competence{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/{{ htmx }}" defer></script>
+</head>
+<body>
+  {% if demo %}<div class="demo-banner" role="status">DEMO — invented people, not real data</div>{% endif %}
+  <header class="top">
+    <a href="/" class="brand">Competence</a>
+    {% block crumbs %}{% endblock %}
+    <nav class="top-nav" aria-label="Main"><a href="/rounds">Rounds</a> <a href="/people">People</a> <a href="/compare">Compare</a> <a href="/certifications">Certifications</a> <a href="/guide">Guide</a> <a href="/admin">Admin</a></nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

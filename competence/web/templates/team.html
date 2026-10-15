@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "macros.html" import everyone_note, headline_tiles, team_filter, team_name %}
+{% block title %}Team · {{ ov.round.label }} · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/round/{{ ov.round.id }}">{{ ov.round.label }}</a><span class="crumb">Team overview</span>{% endblock %}
+{% block content %}
+<h1>Team overview <span class="muted">· {% if team %}{{ team_name(teams, team) }} · {% endif %}{{ ov.round.label }}</span> <a class="help-link" href="/guide#numbers" title="What these figures mean" aria-label="What these figures mean">?</a></h1>
+<p><a href="/round/{{ ov.round.id }}/heatmap{% if team %}?team={{ team }}{% endif %}">Heatmap</a></p>
+{{ team_filter(teams, team, link) }}
+
+{% if tags|length > 1 %}<nav class="filter" aria-label="Tag filter">
+  <a href="{{ link(tag=None) }}"{% if not tag %} aria-current="true"{% endif %}>All</a>
+  {% for t in tags %}<a href="{{ link(tag=t) }}"{% if tag == t %} aria-current="true"{% endif %}>{{ t }}</a>{% endfor %}
+</nav>{% endif %}
+
+{{ headline_tiles(ov) }}
+{{ everyone_note(teams, team) }}
+{% if not ov.previous_round %}<p class="muted">No earlier round to compare with.</p>
+{% else %}<p class="muted">Changes compare with {{ ov.previous_round.label }}, using today's skills and targets.</p>{% endif %}
+
+<h2>Per skill</h2>
+<form method="get" class="inline" aria-label="Category filter">
+  {% if tag %}<input type="hidden" name="tag" value="{{ tag }}">{% endif %}
+  {% if team %}<input type="hidden" name="team" value="{{ team }}">{% endif %}
+  {% if sort %}<input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ dir }}">{% endif %}
+  <label>Category
+    <select name="cat" onchange="this.form.requestSubmit()">
+      <option value="">All categories</option>
+      {% for c in categories %}<option{% if c == cat %} selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </label>
+  <noscript><button>Filter</button></noscript>
+  <span class="muted">{{ rows|length }} skills</span>
+</form>
+
+{% macro th(label, column, help="", num=True) %}
+  <th{% if num %} class="num"{% endif %}{% if help %} title="{{ help }}"{% endif %}{% if sort == column %} aria-sort="{{ 'ascending' if dir == 'asc' else 'descending' }}"{% endif %}>
+    <a href="{{ sort_link(column) }}">{{ label }}{% if sort == column %} {{ "▲" if dir == "asc" else "▼" }}{% endif %}</a>
+  </th>
+{% endmacro %}
+<div class="table-wrap">
+<table class="data">
+  <thead><tr>
+    {{ th("Skill", "skill", num=False) }}{{ th("Prio", "priority") }}{{ th("Rated", "assessed") }}
+    {{ th("Median level", "median_level") }}{{ th("Median desire", "median_desire") }}
+    {{ th("3+", "n3", "People who can work independently") }}{{ th("5+", "n5", "Advanced: compare with experts needed") }}
+    {{ th("Below target", "below") }}{{ th("Shortfall", "shortfall", "Points below role target, summed") }}
+    {{ th("Weighted", "weighted", "Priority × shortfall") }}{{ th("Dev cand.", "dev", "Desire 3 and level ≤ 2") }}
+    {{ th("Median comp.", "competency", "Level used × desire") }}{{ th("Flag", "flag", num=False) }}
+  </tr></thead>
+  <tbody>
+  {% for r in rows %}{% set s = r.stats %}
+  <tr>
+    <td><span class="name">{{ r.name }}</span> {{ r.tag|tag_badge }}
+        <small>{{ r.category }}</small></td>
+    <td class="num">{{ r.priority }}</td>
+    <td class="num">{{ s.assessed }}</td>
+    <td class="num{% if s.median_level is not none %} heat-{{ (s.median_level // 2)|int }}{% endif %}">{{ s.median_level|num }}</td>
+    <td class="num">{{ s.median_desire|num }}</td>
+    <td class="num">{{ s.n3 }}</td>
+    <td class="num">{{ s.n5 }}<span class="muted">/{{ r.experts_needed }}</span></td>
+    <td class="num{% if s.below %} below{% endif %}">{{ s.below }}</td>
+    <td class="num{% if s.shortfall %} below{% endif %}">{{ s.shortfall }}</td>
+    <td class="num{% if s.weighted_shortfall %} below{% endif %}"><strong>{{ s.weighted_shortfall }}</strong></td>
+    <td class="num{% if s.dev_candidates %} dev{% endif %}">{{ s.dev_candidates }}</td>
+    <td class="num">{{ s.median_competency|num }}</td>
+    <td>{% if s.flag %}<span class="flag flag-{{ s.flag|lower|replace(' ', '-') }}">{{ s.flag }}</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<h2>By category</h2>
+<div class="table-wrap">
+<table class="data">
+  <thead><tr><th>Category</th><th class="num">Skills</th><th class="num">Median level</th><th class="num">Median desire</th><th class="num">Weighted shortfall</th><th class="num">Flagged skills</th></tr></thead>
+  <tbody>
+  {% for c in ov.categories %}
+  <tr>
+    <td><a href="{{ link(cat=c.category) }}">{{ c.category }}</a></td>
+    <td class="num">{{ c.skills }}</td><td class="num">{{ c.median_level|num }}</td><td class="num">{{ c.median_desire|num }}</td>
+    <td class="num">{{ c.weighted_shortfall }}</td><td class="num">{{ c.flagged }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

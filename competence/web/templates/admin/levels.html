@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Level texts · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Level texts</span>{% endblock %}
+{% block content %}
+<h1>Level texts</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+{% if saved %}<p class="notice" role="status">Saved.</p>{% endif %}
+<p class="help">What each point of the scale means. Raters see these on the rating page, as a table and as a tooltip
+  on each option. Write them for your team: anchors like "works independently" help people who don't rate skills
+  every day. The numbers and the calculations stay the same. Desire has three points (1, 2, 3), skill level six.</p>
+<form method="post" action="/admin/levels">
+<table class="data admin">
+  <thead><tr><th scope="col">Score</th><th scope="col">Skill level</th><th scope="col">Desire</th></tr></thead>
+  <tbody>
+  {% for l in levels %}
+  <tr>
+    <td class="num">{{ l }}</td>
+    <td><input name="level_{{ l }}" value="{{ labels.level[l] }}" required maxlength="120" size="45" aria-label="Skill level {{ l }}"></td>
+    <td>{% if l in desires %}<input name="desire_{{ l }}" value="{{ labels.desire[l] }}" required maxlength="120" size="40" aria-label="Desire {{ l }}">{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><button>Save</button></p>
+</form>
+{% endblock %}

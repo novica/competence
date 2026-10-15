@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Rounds · Competence{% endblock %}
+{% block crumbs %}<span class="crumb">Rounds</span>{% endblock %}
+{% block content %}
+<h1>Rounds <a class="help-link" href="/guide#round" title="How a round works" aria-label="How a round works">?</a></h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">A round is one pass of assessments, e.g. a quarter. The date decides the order of rounds; a round
+  without a date counts as the newest. Rename or delete rounds in <a href="/admin/rounds">Admin → Rounds</a>.</p>
+
+<form method="post" action="/rounds" class="inline">
+  <label>Label <input name="label" required maxlength="40" placeholder="2026-Q4"></label>
+  <label>Date <input name="held_on" type="date"></label>
+  <button>Start new round</button>
+</form>
+
+{% if rounds %}
+<table class="data">
+  <thead><tr><th>Round</th><th>Date</th><th class="num">Assessed</th><th class="num">Started, nothing rated</th><th class="num">Not started</th></tr></thead>
+  <tbody>
+  {% for p in rounds %}
+  <tr><td><a href="/round/{{ p.round.id }}">{{ p.round.label }}</a></td>
+    <td>{{ p.round.held_on or "" }}</td>
+    <td class="num">{{ p.assessed }} of {{ p.people }}</td>
+    <td class="num">{{ p.started }}</td>
+    <td class="num">{{ p.not_started }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="muted">No rounds yet.</p>{% endif %}
+{% endblock %}

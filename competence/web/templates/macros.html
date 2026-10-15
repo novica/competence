@@ -1,0 +1,49 @@
+{# Shared page parts. #}
+
+{% macro _tile(h, hp, ov, label, value, field, unit="", better="up", help="", decimals=0) %}
+  {% set d = h.delta(hp, field) %}
+  <div class="tile" {% if help %}title="{{ help }}"{% endif %}>
+    <div class="tile-label">{{ label }}</div>
+    <div class="tile-value">{{ value|num(decimals) }}{{ unit if value is not none }}</div>
+    {% if d is not none %}
+    <div class="tile-delta {% if d == 0 %}{% elif (d > 0) == (better == 'up') %}good{% else %}bad{% endif %}">
+      {{ d|signed(decimals) }}{{ unit }} vs {{ ov.previous_round.label }}</div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{# The team overview's headline figures with the change since the previous round. #}
+{% macro headline_tiles(ov) %}
+{% set h, hp = ov.headline, ov.previous_headline %}
+<section class="tiles" aria-label="Headline figures">
+  {{ _tile(h, hp, ov, "People assessed", h.people_assessed, "people_assessed") }}
+  {{ _tile(h, hp, ov, "At or above role target", h.pct_at_target, "pct_at_target", "%", "up", "Share of rated person×skill pairs with a target that are at or above it") }}
+  {{ _tile(h, hp, ov, "Priority-weighted shortfall per person", h.weighted_shortfall_per_person, "weighted_shortfall_per_person", "", "down", "Priority × points below target, summed over skills and people, divided by the people assessed") }}
+  {{ _tile(h, hp, ov, "Team gaps", h.team_gaps, "team_gaps", "", "down", "Skills where nobody is at 3+") }}
+  {{ _tile(h, hp, ov, "Below expert target", h.below_expert_target, "below_expert_target", "", "down", "Fewer people at 5+ than experts needed") }}
+  {{ _tile(h, hp, ov, "Key-person risks", h.key_person_risks, "key_person_risks", "", "down", "Priority-3 skills with exactly one person at 5+") }}
+  {{ _tile(h, hp, ov, "Median competency", h.median_competency, "median_competency", "", "up", "Level used × desire: the middle value over all rated pairs") }}
+  <div class="tile" title="Current count; goals don't have history per round">
+    <div class="tile-label">Open development goals</div>
+    <div class="tile-value">{{ ov.open_goals }}</div>
+  </div>
+</section>
+{% endmacro %}
+
+{# Under the headline in the Everyone view: why the teams' figures don't add up to it. #}
+{% macro everyone_note(teams, team) %}
+{% if teams|length > 1 and not team %}<p class="muted">Everyone counts every person and every skill; a team's view
+  counts only its own people, and only its categories if it has chosen some. So the teams' figures don't add up to
+  these.</p>{% endif %}
+{% endmacro %}
+
+{# Team filter links, shown once there are two or more teams. link(team=...) builds the URL, keeping other filters. #}
+{% macro team_filter(teams, team, link) %}
+{% if teams|length > 1 %}<nav class="filter" aria-label="Team filter">
+  <a href="{{ link(team=None) }}"{% if not team %} aria-current="true"{% endif %}>Everyone</a>
+  {% for t in teams %}<a href="{{ link(team=t.id) }}"{% if team == t.id %} aria-current="true"{% endif %}>{{ t.name }}{% if t.retired_on %} <span class="muted">(retired)</span>{% endif %}</a>{% endfor %}
+</nav>{% endif %}
+{% endmacro %}
+
+{# The chosen team's name, or blank. #}
+{% macro team_name(teams, team) %}{% for t in teams if t.id == team %}{{ t.name }}{% endfor %}{% endmacro %}

@@ -1,0 +1,30 @@
+{% set url = "/round/%d/person/%d/skill/%d" % (a.round.id, a.person.id, r.skill_id) %}
+<form class="skill-row" id="skill-{{ r.skill_id }}" method="post" action="{{ url }}"
+      hx-post="{{ url }}" hx-trigger="change" hx-swap="outerHTML">
+  <div class="skill">
+    <span class="name">{{ r.name }}</span> {{ r.tag|tag_badge }}
+    <small>{{ r.description }}</small>
+  </div>
+  {% for field, label in [("self_level", "Self"), ("agreed", "Agreed"), ("desire", "Desire")] %}
+  {% set texts = labels["desire" if field == "desire" else "level"] %}
+  {% set points = desires if field == "desire" else levels %}
+  <select name="{{ field }}" aria-label="{{ label }}: {{ r.name }}"{% if r[field ~ "_changed"] %} class="changed"{% endif %}>
+    <option value="">–</option>
+    {% for l in points %}<option value="{{ l }}" title="{{ texts[l] }}"{% if r[field] == l %} selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  {% endfor %}
+  <span class="num last" title="Last round: level used · desire">
+    {%- if r.compared and (r.prev_used is not none or r.prev_desire is not none) -%}
+      {{ r.prev_used if r.prev_used is not none else "–" }}·{{ r.prev_desire if r.prev_desire is not none else "–" }}
+    {%- elif r.compared %}new{% else %}–{% endif -%}
+  </span>
+  <span class="num">{{ r.target if r.target is not none else "–" }}</span>
+  {% set g = r.gap %}
+  <span class="num gap {% if g is none %}{% elif g < 0 %}below{% else %}ok{% endif %}">
+    {%- if g is none %}–{% elif g > 0 %}+{{ g }}{% else %}{{ g }}{% endif -%}
+  </span>
+  <span class="state">
+    <noscript><button>Save</button></noscript>
+    {% if saved %}<span class="saved" role="status">saved</span>{% endif %}
+  </span>
+</form>

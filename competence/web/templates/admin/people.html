@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}People · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">People</span>{% endblock %}
+{% block content %}
+<h1>People</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">Inactive people disappear from rounds and lists; their past assessments and goals are kept.</p>
+<form method="post" action="/admin/people" class="inline">
+  <label>Name <input name="name" required maxlength="80"></label>
+  <button>Add person</button>
+</form>
+<table class="data admin">
+  <thead><tr><th>Name</th><th class="num">Assessments</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for p in people %}
+  <tr{% if not p.active %} class="retired"{% endif %}>
+    <td><form method="post" action="/admin/people/{{ p.id }}" class="inline">
+      <input name="name" value="{{ p.name }}" required maxlength="120" aria-label="Name"><button class="secondary">Rename</button></form></td>
+    <td class="num">{{ p.assessments }}</td>
+    <td>{{ "active" if p.active else "inactive" }}</td>
+    <td><form method="post" action="/admin/people/{{ p.id }}/active">
+      <input type="hidden" name="active" value="{{ 'false' if p.active else 'true' }}">
+      <button class="secondary">{{ "Deactivate" if p.active else "Reactivate" }}</button></form></td>
+  </tr>
+  {% else %}<tr><td colspan="4" class="muted">No people yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

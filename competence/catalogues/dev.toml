@@ -1,0 +1,96 @@
+# Skill catalogue for a small software development team split into front end and back end.
+# The demo database (`competence init --demo`) is built on it; it also works as a starting point for a real team:
+#
+#     competence init --catalogue dev
+#
+# Targets use the scale 0, 1, 2, 3, 5, 8 and are the author's judgement, not an external standard.
+# A skill's target for a role is its category's default unless the skill lists its own.
+# The layout is explained in empty.toml.
+
+roles = [
+  { code = "FE", name = "Front-end Developer" },
+  { code = "BE", name = "Back-end Developer" },
+  { code = "FS", name = "Full-stack Developer" },
+  { code = "LEAD", name = "Tech Lead" },
+]
+
+# ---------- shared ----------
+
+[[categories]]
+name = "Version Control & Collaboration"
+targets = { FE = 5, BE = 5, FS = 5, LEAD = 5 }
+skills = [
+  { name = "Git", tag = "General", description = "Branching, rebasing, resolving conflicts, a readable history" },
+  { name = "Pull requests & code review", tag = "General", description = "Small reviewable changes; giving and taking review comments", targets = { LEAD = 8 } },
+  { name = "Technical writing", tag = "General", description = "READMEs, design notes, decision records", targets = { FE = 3, BE = 3, FS = 3 } },
+]
+
+[[categories]]
+name = "Testing & Quality"
+targets = { FE = 3, BE = 5, FS = 5, LEAD = 5 }
+skills = [
+  { name = "Unit testing", tag = "General", description = "Fast, focused tests; fixtures and test doubles" },
+  { name = "Integration & end-to-end testing", tag = "General", description = "Testing across components and in a real browser (Playwright)", targets = { FE = 5 } },
+  { name = "Linting & static analysis", tag = "General", description = "Formatters, linters, type checkers in the editor and in CI" },
+  { name = "Debugging", tag = "General", description = "Reproducing, narrowing down and fixing faults; reading stack traces", targets = { FE = 5 } },
+]
+
+[[categories]]
+name = "Ways of Working"
+targets = { FE = 3, BE = 3, FS = 3, LEAD = 5 }
+skills = [
+  { name = "Agile delivery", tag = "General", description = "Planning, slicing work, estimating, retrospectives" },
+  { name = "Mentoring", tag = "General", description = "Pairing, onboarding newcomers, growing others' skills", targets = { FE = 2, BE = 2, FS = 2, LEAD = 8 } },
+  { name = "AI coding assistants (Copilot / Claude Code)", tag = "General", description = "Using assistants well: prompting, reviewing what they write" },
+]
+
+# ---------- front end ----------
+
+[[categories]]
+name = "Front-end Development"
+targets = { FE = 5, BE = 1, FS = 3, LEAD = 2 }
+skills = [
+  { name = "HTML & semantic markup", tag = "Front end", description = "Meaningful elements, forms, landmarks" },
+  { name = "CSS & layout", tag = "Front end", description = "Flexbox, grid, custom properties, cascade layers" },
+  { name = "JavaScript", tag = "Front end", description = "The language, the DOM, async code, modules", targets = { FE = 8, BE = 2, FS = 5 } },
+  { name = "TypeScript", tag = "Front end", description = "Types for front-end code; strict mode" },
+  { name = "Component framework (React / Vue / Svelte)", tag = "Front end", description = "Components, state, routing", targets = { FS = 5 } },
+  { name = "Front-end build tools (Vite / bundlers)", tag = "Front end", description = "Dev servers, bundling, environment config", targets = { FE = 3, FS = 2 } },
+  { name = "jQuery", tag = "Front end", description = "Maintaining older pages", targets = { FE = 2, BE = 0, FS = 1, LEAD = 0 } },
+]
+
+[[categories]]
+name = "User Experience"
+targets = { FE = 5, BE = 0, FS = 2, LEAD = 2 }
+skills = [
+  { name = "Accessibility (WCAG)", tag = "Front end", description = "Keyboard use, screen readers, contrast, ARIA where needed" },
+  { name = "Responsive design", tag = "Front end", description = "Layouts that work from phone to wide screen" },
+  { name = "Web performance", tag = "Front end", description = "Core Web Vitals, loading, caching in the browser", targets = { FE = 3 } },
+  { name = "Design systems", tag = "Front end", description = "Shared components and tokens; working with designers", targets = { FE = 3 } },
+]
+
+# ---------- back end ----------
+
+[[categories]]
+name = "Back-end Development"
+targets = { FE = 1, BE = 5, FS = 3, LEAD = 3 }
+skills = [
+  { name = "Python", tag = "Back end", description = "The language, packaging, async code", targets = { BE = 8, FS = 5 } },
+  { name = "REST API design", tag = "Back end", description = "Resources, status codes, versioning, OpenAPI", targets = { FE = 2 } },
+  { name = "SQL", tag = "Back end", description = "Joins, aggregation, window functions, query plans" },
+  { name = "Database design & migrations", tag = "Back end", description = "Schemas, indexes, changing a live schema safely" },
+  { name = "Authentication & authorisation", tag = "Back end", description = "Sessions, tokens, OAuth, permissions" },
+  { name = "Caching & queues", tag = "Back end", description = "Redis, background jobs, retries", targets = { BE = 3, FS = 2 } },
+]
+
+[[categories]]
+name = "Operations"
+targets = { FE = 1, BE = 3, FS = 3, LEAD = 3 }
+skills = [
+  { name = "Containers (Docker)", tag = "Back end", description = "Images, compose files, small and reproducible builds" },
+  { name = "CI/CD pipelines", tag = "Back end", description = "Build, test and deploy on every change", targets = { FE = 2 } },
+  { name = "Cloud services", tag = "Back end", description = "Compute, storage and networking on a cloud provider" },
+  { name = "Monitoring & logging", tag = "Back end", description = "Metrics, structured logs, alerts, dashboards" },
+  { name = "Linux & shell", tag = "Back end", description = "Working on servers, shell scripts, permissions", targets = { BE = 5 } },
+  { name = "Incident response & on-call", tag = "Back end", description = "Handling outages, postmortems", targets = { LEAD = 5 } },
+]

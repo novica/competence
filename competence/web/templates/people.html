@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "macros.html" import team_filter %}
+{% block title %}People · Competence{% endblock %}
+{% block crumbs %}<span class="crumb">People</span>{% endblock %}
+{% block content %}
+<h1>People</h1>
+<p class="help">Everyone who is assessed, as of their newest assessment. Add, rename or deactivate people in
+  <a href="/admin/people">Admin → People</a>.</p>
+
+{{ team_filter(teams, team, link) }}
+{% if people %}
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Name</th><th>Newest round</th><th>Role</th>{% if teams %}<th>Team</th>{% endif %}<th class="num">Open goals</th>
+    {% if certs %}<th class="num">Certifications needing attention <a class="help-link" href="/guide#certifications" title="How certifications work" aria-label="How certifications work">?</a></th>{% endif %}</tr></thead>
+  <tbody>
+  {% for pl in people %}
+  <tr>{% if pl.latest_round %}
+    <td><a href="/round/{{ pl.latest_round.id }}/person/{{ pl.person.id }}/profile">{{ pl.person.name }}</a></td>
+    <td><a href="/round/{{ pl.latest_round.id }}">{{ pl.latest_round.label }}</a></td>
+    <td>{{ pl.role }}</td>
+    {% if teams %}<td>{{ pl.team or "" }}</td>{% endif %}
+    {% else %}
+    <td>{{ pl.person.name }}</td>
+    <td colspan="{{ 3 if teams else 2 }}" class="muted">Not assessed yet</td>
+    {% endif %}
+    <td class="num">{{ pl.open_goals }}</td>
+    {% if certs %}<td class="num"><a href="/people/{{ pl.person.id }}/certifications">{{ pl.cert_attention }}</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% else %}<p class="muted">{{ "Nobody in this team." if team else "No people yet." }}</p>{% endif %}
+{% endblock %}

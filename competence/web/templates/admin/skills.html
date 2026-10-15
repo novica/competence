@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Skills · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><span class="crumb">Skills</span>{% endblock %}
+{% block content %}
+<h1>Skills</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p><a href="/admin/skills/new{% if cat %}?category={{ cat|urlencode }}{% endif %}">Add a skill</a>
+  <span class="muted">· To split a skill: add the new ones with "copy ratings from", then retire the old one.</span></p>
+
+<form method="get" class="inline" aria-label="Filter skills">
+  <label>Category <select name="cat"><option value="">All</option>
+    {% for c in categories %}<option{% if c == cat %} selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  {% if tags|length > 1 %}<label>Tag <select name="tag"><option value="">All</option>
+    {% for t in tags %}<option{% if t == tag %} selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>{% endif %}
+  <label>Show <select name="show">
+    <option value="all"{% if show == "all" %} selected{% endif %}>Active and retired</option>
+    <option value="active"{% if show == "active" %} selected{% endif %}>Active only</option></select></label>
+  <button>Filter</button> <span class="muted">{{ count }} skills</span>
+</form>
+{% set can_move = not tag and show == "all" %}
+{% if not can_move %}<p class="muted">To change the order, clear the tag filter and show active and retired skills.</p>{% endif %}
+
+{% for category, items in groups %}
+<h2>{{ category }}</h2>
+<details class="rename"><summary>Rename category</summary>
+<form method="post" action="/admin/categories/rename" class="inline" aria-label="Rename {{ category }}">
+  <input type="hidden" name="old" value="{{ category }}">
+  <label>New name <input name="new" value="{{ category }}" required maxlength="120"></label>
+  <button class="secondary">Rename</button>
+  <span class="muted">All its skills (retired too) and the teams using it follow.</span>
+</form></details>
+<table class="data admin">
+  <thead><tr><th>Order</th><th>Skill</th><th>Tag</th><th class="num">Prio</th><th class="num">Experts</th><th class="num">Ratings</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in items %}
+  <tr id="skill-{{ s.id }}"{% if s.retired_on %} class="retired"{% endif %}>
+    <td class="order">
+      {% if can_move %}
+      <form method="post" action="/admin/skills/{{ s.id }}/move"><input type="hidden" name="back" value="{{ back }}">
+        <button name="direction" value="up" aria-label="Move {{ s.name }} up"{% if loop.first %} disabled{% endif %}>↑</button>
+        <button name="direction" value="down" aria-label="Move {{ s.name }} down"{% if loop.last %} disabled{% endif %}>↓</button></form>
+      {% endif %}
+    </td>
+    <td><a href="/admin/skills/{{ s.id }}/edit">{{ s.name }}</a><small>{{ s.description }}</small></td>
+    <td>{{ s.tag|tag_badge }}</td>
+    <td class="num">{{ s.priority }}</td><td class="num">{{ s.experts_needed }}</td><td class="num">{{ s.ratings }}</td>
+    <td>{% if s.retired_on %}retired {{ s.retired_on }}{% else %}active{% endif %}</td>
+    <td class="actions-cell">
+      {% if s.retired_on %}
+      <form method="post" action="/admin/skills/{{ s.id }}/unretire"><input type="hidden" name="back" value="{{ back }}"><button class="secondary">Un-retire</button></form>
+      {% else %}
+      <form method="post" action="/admin/skills/{{ s.id }}/retire"><input type="hidden" name="back" value="{{ back }}"><button class="secondary">Retire</button></form>
+      {% endif %}
+      {% if not s.ratings and not s.goals %}
+      <form method="post" action="/admin/skills/{{ s.id }}/delete" onsubmit='return confirm({{ ("Delete " ~ s.name ~ " for good? It has no ratings.")|tojson }})'>
+        <input type="hidden" name="back" value="{{ back }}"><button class="danger">Delete</button></form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="muted">No skills match.</p>
+{% endfor %}
+{% endblock %}

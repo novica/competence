@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ a.person.name }} · {{ a.round.label }} · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/round/{{ a.round.id }}">{{ a.round.label }}</a><span class="crumb">{{ a.person.name }}</span>{% endblock %}
+{% block content %}
+<h1>{{ a.person.name }} <span class="muted">· {{ a.role.name }}{% if a.team %} · {{ a.team.name }}{% endif %} · {{ a.round.label }}</span></h1>
+
+<p class="help">
+  Each change saves straight away. <strong>Self</strong> = the person's own rating;
+  <strong>Agreed</strong> = only if peer review changed it (blank keeps the self-rating);
+  <strong>Desire</strong> = how much they want to develop it. Skill level 0, 1, 2, 3, 5, 8; desire 1, 2, 3; blank = not
+  assessed.
+  Gap = level used − target for this role. <a class="help-link" href="/guide#method" title="How rating works" aria-label="How rating works">?</a>
+</p>
+<details class="legend"{% if not prev %} open{% endif %}>
+  <summary>What the levels mean</summary>
+  <table class="data compact">
+    <thead><tr><th scope="col">Score</th><th scope="col">Skill level (self, agreed)</th><th scope="col">Desire</th></tr></thead>
+    <tbody>{% for l in levels %}
+      <tr><td class="num">{{ l }}</td><td>{{ labels.level[l] }}</td><td>{{ labels.desire.get(l, "") }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</details>
+{% if prev %}
+<p class="notice">
+  Pre-filled from <strong>{{ prev.round.label }}</strong>{% if prev.role.name != a.role.name %} (role then: {{ prev.role.name }}){% endif %}:
+  Self starts at last round's level used, Agreed starts blank, Desire carries over.
+  <span class="changed-key">Highlighted</span> = different from last round. <em>Last</em> shows last round's level · desire.
+</p>
+{% else %}
+<p class="notice">First assessment for {{ a.person.name }}: nothing to pre-fill.</p>
+{% endif %}
+
+{% if team_cats %}<p class="notice">
+  {% if show_all %}Showing every category. <a href="{{ link(all=None) }}">Only {{ a.team.name }}'s {{ team_cats|length }} categories</a>
+  {% else %}Showing the {{ team_cats|length }} categories {{ a.team.name }} uses
+    (<a href="/admin/teams/{{ a.team.id }}/categories">change</a>).
+    <a href="{{ link(all='true') }}">Show every category</a> to rate a skill outside them.{% endif %}
+</p>{% endif %}
+<nav class="filter" aria-label="Tag filter">
+  {% if tags|length > 1 %}<a href="{{ link(tag=None) }}"{% if not tag %} aria-current="true"{% endif %}>All</a>
+  {% for t in tags %}<a href="{{ link(tag=t) }}"{% if tag == t %} aria-current="true"{% endif %}>{{ t }}</a>{% endfor %}{% endif %}
+  <span class="muted">{{ count }} skills</span>
+</nav>
+
+<div class="rows-head" aria-hidden="true">
+  <span>Skill</span><span>Self</span><span>Agreed</span><span>Desire</span><span>Last</span><span>Target</span><span>Gap</span><span></span>
+</div>
+{% for category, rows in groups %}
+<details open class="category">
+  <summary>{{ category }} <span class="muted">({{ rows|length }})</span></summary>
+  {% for r in rows %}{% include "fragments/skill_row.html" %}{% endfor %}
+</details>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,56 @@
+[project]
+name = "competence"
+version = "0.1.0"
+description = "Competence: a local skills-matrix app for teams"
+readme = "README.md"
+authors = [{ name = "Novica Nakov", email = "nnovica@gmail.com" }]
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+keywords = ["skills matrix", "competency", "team", "assessment", "fastapi"]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business",
+]
+dependencies = [
+    "fastapi==0.142.2",
+    "jinja2==3.1.6",
+    "platformdirs==4.13.0",
+    "python-multipart==0.0.32",
+    "uvicorn==0.54.0",
+]
+
+[project.urls]
+Repository = "https://github.com/novica/competence"
+Issues = "https://github.com/novica/competence/issues"
+
+[project.scripts]
+competence = "competence.cli:main"
+
+[dependency-groups]
+dev = [
+    "httpx2==2.13.1",
+    "pytest==9.1.1",
+    "ruff==0.17.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} categories · Admin · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/admin">Admin</a><a class="crumb" href="/admin/teams">Teams</a><span class="crumb">{{ team.name }}</span>{% endblock %}
+{% block content %}
+<h1>Categories {{ team.name }} uses</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<p class="help">Tick the categories that matter for {{ team.name }}. Its people's rating forms and the {{ team.name }}
+  team views only show these skills (a rater can still choose "show every category"). Untick everything to use all
+  categories again. Nothing is deleted: ratings outside the ticked categories stay, and come back if a category is
+  ticked again.</p>
+<form method="post" action="/admin/teams/{{ team.id }}/categories" class="stacked">
+  <fieldset>
+    <legend>Categories</legend>
+    {% for c in categories %}
+    <label class="check"><input type="checkbox" name="category" value="{{ c }}"{% if c in chosen %} checked{% endif %}> {{ c }}</label>
+    {% else %}<p class="muted">No categories yet: add skills in Admin → Skills first.</p>
+    {% endfor %}
+  </fieldset>
+  <p><button>Save</button> <a href="/admin/teams">Cancel</a></p>
+</form>
+{% endblock %}

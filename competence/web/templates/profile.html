@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ a.person.name }} profile · {{ a.round.label }} · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/round/{{ a.round.id }}">{{ a.round.label }}</a><span class="crumb">{{ a.person.name }}</span>{% endblock %}
+{% block content %}
+{% set s = p.summary %}
+<h1>{{ a.person.name }} <span class="muted">· {{ a.role.name }}{% if a.team %} · {{ a.team.name }}{% endif %} · {{ a.round.label }}</span> <a class="help-link" href="/guide#numbers" title="What these figures mean" aria-label="What these figures mean">?</a></h1>
+<p class="print-only">{{ a.round.label }}{% if a.round.held_on %} (held {{ a.round.held_on }}){% endif %}{% if tag %} · tag {{ tag }} only{% endif %}
+   · printed {{ today }}. Gaps are against the role targets as of {{ today }}.</p>
+<p class="no-print"><button type="button" class="secondary" onclick="window.print()">Print</button>
+   <a href="/round/{{ a.round.id }}/person/{{ a.person.id }}">Edit ratings</a> ·
+   <a href="/round/{{ a.round.id }}/team">Team overview</a>{% if p.previous %} ·
+   <a href="/compare?from={{ p.previous.round.id }}&amp;to={{ a.round.id }}&amp;person={{ a.person.id }}">Compare with {{ p.previous.round.label }}</a>{% endif %}</p>
+
+{% if tags|length > 1 %}<nav class="filter no-print" aria-label="Tag filter">
+  <a href="?"{% if not tag %} aria-current="true"{% endif %}>All</a>
+  {% for t in tags %}<a href="?tag={{ t|urlencode }}"{% if tag == t %} aria-current="true"{% endif %}>{{ t }}</a>{% endfor %}
+</nav>{% endif %}
+
+<section class="tiles" aria-label="Summary">
+  <div class="tile"><div class="tile-label">Skills assessed</div><div class="tile-value">{{ s.assessed }}</div></div>
+  <div class="tile"><div class="tile-label">Median level</div><div class="tile-value">{{ s.median_level|num }}</div></div>
+  <div class="tile"><div class="tile-label">Below role target</div><div class="tile-value">{{ s.below }}</div></div>
+  <div class="tile"><div class="tile-label">Total shortfall</div><div class="tile-value">{{ s.shortfall }}</div></div>
+  <div class="tile" title="Sum of priority × points below target"><div class="tile-label">Priority-weighted shortfall</div><div class="tile-value">{{ s.weighted_shortfall }}</div></div>
+  <div class="tile"><div class="tile-label">Median competency</div><div class="tile-value">{{ s.median_competency|num }}</div></div>
+  <div class="tile" title="Desire 3 and level ≤ 2"><div class="tile-label">Development candidates</div><div class="tile-value">{{ s.dev_candidates }}</div></div>
+</section>
+
+<div class="two-col">
+<section>
+  <h2>Top {{ p.top_gaps|length }} priority gaps</h2>
+  <p class="muted">Priority × points below the target for {{ a.role.name }}.</p>
+  {% if p.top_gaps %}
+  <table class="data">
+    <thead><tr><th>Skill</th><th class="num">Prio</th><th class="num">Target</th><th class="num">Level</th><th class="num">Gap</th><th class="num">Prio gap</th><th class="no-print"></th></tr></thead>
+    <tbody>{% for r in p.top_gaps %}
+      <tr><td>{{ r.name }}<small>{{ r.category }}</small></td><td class="num">{{ r.priority }}</td>
+        <td class="num">{{ r.target|num }}</td><td class="num">{{ r.used|num }}</td>
+        <td class="num below">{{ r.gap }}</td><td class="num"><strong>{{ r.priority * (0 - r.gap) }}</strong></td>
+        <td class="no-print actions-cell"><a href="/round/{{ a.round.id }}/person/{{ a.person.id }}/goals/new?skill_id={{ r.skill_id }}">Add goal</a></td></tr>
+    {% endfor %}</tbody>
+  </table>
+  {% else %}<p>No skills below target.</p>{% endif %}
+</section>
+
+<section>
+  <h2>Top {{ p.top_interests|length }} interests</h2>
+  <p class="muted">Desire 2 or 3, highest desire first, then lowest current level.</p>
+  {% if p.top_interests %}
+  <table class="data">
+    <thead><tr><th>Skill</th><th class="num">Desire</th><th class="num">Level</th><th class="num">Target</th><th class="num">Dev cand.</th></tr></thead>
+    <tbody>{% for r in p.top_interests %}
+      <tr><td>{{ r.name }}<small>{{ r.category }}</small></td><td class="num">{{ r.desire }}</td>
+        <td class="num">{{ r.used|num }}</td><td class="num">{{ r.target|num }}</td>
+        <td class="num">{% if r.desire >= 3 and r.used is not none and r.used <= 2 %}<span class="dev">yes</span>{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+  {% else %}<p>No interests recorded (desire 2 or 3).</p>{% endif %}
+</section>
+</div>
+
+<section id="goals">
+  <h2>Development plan</h2>
+  <p class="no-print"><a href="/round/{{ a.round.id }}/person/{{ a.person.id }}/goals/new">Add a goal</a>
+     <span class="muted">· or use "Add goal" on a gap above. Progress = level used in {{ a.round.label }} against the goal's target.</span></p>
+  {% if goals %}
+  <table class="data goals">
+    <thead><tr><th>Goal</th><th class="num">Level / target</th><th>Status</th><th class="no-print"></th></tr></thead>
+    <tbody>{% for gp in goals %}{% include "fragments/goal_row.html" %}{% endfor %}</tbody>
+  </table>
+  {% else %}<p class="muted">No goals yet.</p>{% endif %}
+</section>
+
+<section id="certifications">
+  <h2>Certifications <span class="muted">· today</span></h2>
+  {% if certs %}
+  <p>{% for r in certs %}<span class="cert cert-{{ r.status }}" title="{{ cert_labels[r.status] }}{% if r.current and r.current.expires_on %}, until {{ r.current.expires_on }}{% endif %}">{{ r.cert.name }}: {{ cert_labels[r.status] }}</span> {% endfor %}</p>
+  {% else %}<p class="muted">None held or required.</p>{% endif %}
+  <p class="no-print"><a href="/people/{{ a.person.id }}/certifications">Record or renew</a></p>
+</section>
+
+<section>
+  <h2>Changes since {{ p.previous.round.label if p.previous else "last round" }}</h2>
+  {% if not p.previous %}
+  <p class="muted">First assessment: nothing to compare with.</p>
+  {% elif p.changes %}
+  <table class="data">
+    <thead><tr><th>Skill</th><th class="num">Level then → now</th><th class="num">Desire then → now</th></tr></thead>
+    <tbody>{% for r in p.changes %}
+      <tr><td>{{ r.name }}<small>{{ r.category }}</small></td>
+        <td class="num">{{ r.prev_used|num }} → <strong>{{ r.used|num }}</strong>
+          {% if r.used is not none and r.prev_used is not none and r.used != r.prev_used %}
+          <span class="{{ 'good' if r.used > r.prev_used else 'bad' }}">({{ (r.used - r.prev_used)|signed(0) }})</span>{% endif %}</td>
+        <td class="num">{{ r.prev_desire|num }} → {{ r.desire|num }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+  {% else %}<p>No changes from {{ p.previous.round.label }}.</p>{% endif %}
+</section>
+{% endblock %}

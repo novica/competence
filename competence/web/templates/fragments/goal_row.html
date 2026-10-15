@@ -1,0 +1,27 @@
+<tr id="goal-{{ gp.goal.id }}" class="goal-{{ gp.goal.status }}">
+  <td><strong>{{ gp.goal.title }}</strong>
+    <small>{{ gp.goal.skill_name or "General goal" }} · set in {{ gp.goal.created_round.label }}{% if gp.goal.due_round %} · due {{ gp.goal.due_round.label }}{% endif %}</small>
+    {% if gp.goal.actions %}<div class="actions">{{ gp.goal.actions }}</div>{% endif %}
+  </td>
+  <td class="num">
+    {% if gp.goal.skill_id is none %}<span class="muted">–</span>
+    {% else %}
+      <strong>{{ gp.current|num }}</strong> / {{ gp.goal.target_level|num }}
+      {% if gp.delta is not none and gp.previous_round %}<small class="{{ 'good' if gp.delta > 0 else 'bad' if gp.delta < 0 else '' }}">{{ gp.delta|signed(0) }} since {{ gp.previous_round.label }}</small>{% endif %}
+      {% if gp.reached %}<small class="good">target reached</small>{% endif %}
+    {% endif %}
+  </td>
+  <td>
+    {% set url = "/goal/%d/status" % gp.goal.id %}
+    <span class="print-only">{{ statuses[gp.goal.status] }}</span>
+    <form class="no-print" method="post" action="{{ url }}" hx-post="{{ url }}" hx-trigger="change" hx-target="#goal-{{ gp.goal.id }}" hx-swap="outerHTML">
+      <input type="hidden" name="round_id" value="{{ a.round.id }}">
+      <select name="status" aria-label="Status: {{ gp.goal.title }}">
+        {% for key, label in statuses.items() %}<option value="{{ key }}"{% if key == gp.goal.status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <noscript><button>Save</button></noscript>
+      {% if saved %}<span class="saved" role="status">saved</span>{% endif %}
+    </form>
+  </td>
+  <td class="no-print"><a href="/goal/{{ gp.goal.id }}/edit?round={{ a.round.id }}">Edit</a></td>
+</tr>

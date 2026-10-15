@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ pc.person.name }} · Certifications · Competence{% endblock %}
+{% block crumbs %}<a class="crumb" href="/certifications">Certifications</a><span class="crumb">{{ pc.person.name }}</span>{% endblock %}
+{% block content %}
+<h1>{{ pc.person.name }} <span class="muted">· certifications</span></h1>
+<p class="help">{% if pc.role %}Required ones follow the role in {{ pc.person.name }}'s latest assessment:
+  <strong>{{ pc.role.name }}</strong>.{% else %}Not assessed yet, so no role and nothing is required.{% endif %}
+  Renewing adds a new record; the newest one counts and older ones stay as history.</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+{% if pc.rows %}
+<table class="data">
+  <thead><tr><th>Certification</th><th>Status</th><th>Obtained</th><th>Expires</th><th>History</th></tr></thead>
+  <tbody>{% for r in pc.rows %}
+    <tr id="cert-{{ r.cert.id }}"{% if r.cert.retired_on %} class="retired"{% endif %}>
+      <td>{{ r.cert.name }}{% if r.required %} <span class="muted">(required)</span>{% endif %}
+        {% if r.cert.retired_on %}<small>retired {{ r.cert.retired_on }}</small>{% endif %}</td>
+      <td>{% if r.status %}<span class="cert cert-{{ r.status }}">{{ status_labels[r.status] }}</span>{% else %}<span class="muted">–</span>{% endif %}</td>
+      <td>{{ r.current.obtained_on if r.current else "–" }}</td>
+      <td>{{ (r.current.expires_on or "no expiry") if r.current else "–" }}</td>
+      <td>{% if r.history %}<details><summary>{{ r.history|length }} record{{ "s" if r.history|length != 1 }}</summary>
+        <ul class="list">{% for h in r.history %}
+          <li>{{ h.obtained_on }} → {{ h.expires_on or "no expiry" }}{% if h.notes %} <span class="muted">· {{ h.notes }}</span>{% endif %}
+            <form method="post" action="/certifications/records/{{ h.id }}/delete" class="inline-form"
+                  onsubmit='return confirm({{ ("Delete the " ~ r.cert.name ~ " record from " ~ h.obtained_on ~ "? Only for mistakes: renewals keep old records as history.")|tojson }})'>
+              <button class="danger">Delete</button></form></li>
+        {% endfor %}</ul></details>{% else %}<span class="muted">–</span>{% endif %}</td>
+    </tr>
+  {% endfor %}</tbody>
+</table>
+{% else %}<p class="muted">No certifications in the list yet. <a href="/admin/certifications/new">Add one in Admin</a>.</p>{% endif %}
+
+{% if choices %}
+<h2>Record or renew</h2>
+<form method="post" action="/people/{{ pc.person.id }}/certifications" class="stacked">
+  <label>Certification <select name="certification_id" required>
+    {% for c in choices %}<option value="{{ c.id }}"{% if c.id == v.certification_id %} selected{% endif %}>{{ c.name }}{% if c.valid_months %} (valid {{ c.valid_months }} months){% endif %}</option>{% endfor %}
+  </select></label>
+  <label>Obtained on <input type="date" name="obtained_on" required value="{{ v.obtained_on or '' }}"></label>
+  <label>Expires on (optional) <input type="date" name="expires_on" value="{{ v.expires_on or '' }}">
+    <small>Leave blank to work it out from how long the certification is valid.</small></label>
+  <label>Notes (optional) <input name="notes" maxlength="2000" value="{{ v.notes or '' }}" placeholder="e.g. course provider, certificate number"></label>
+  <p><button>Save</button></p>
+</form>
+{% endif %}
+{% endblock %}
