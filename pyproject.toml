@@ -1,6 +1,6 @@
 [project]
 name = "competence"
-version = "0.1.0"
+version = "0.1.1"
 description = "Competence: a local skills-matrix app for teams"
 readme = "README.md"
 authors = [{ name = "Novica Nakov", email = "nnovica@gmail.com" }]
