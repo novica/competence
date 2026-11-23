@@ -38,7 +38,7 @@ competence = "competence.cli:main"
 dev = [
     "httpx2==2.13.1",
     "pytest==9.1.1",
-    "ruff==0.17.0",
+    "ruff==0.17.1",
 ]
 
 [build-system]
